@@ -1,0 +1,55 @@
+{
+  "files.exclude": {
+    "**/.venv": true,
+    "**/.nox": true,
+    "**/.ruff_cache": true,
+    "**/.pytest_cache": true,
+    "**/__pycache__": true,
+    "**/*.egg-info": true,
+  },
+  "files.watcherExclude": {
+    "**/.venv": true,
+    "**/.nox": true,
+    "**/.ruff_cache": true,
+    "**/.pytest_cache": true,
+    "**/__pycache__": true,
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/.nox": true,
+    "**/.ruff_cache": true,
+    "**/.pytest_cache": true,
+    "**/__pycache__": true,
+  },
+  /* Python file settings */
+  "[python]": {
+    "editor.rulers": [80],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+  },
+  /* Ruff for python */
+  "ruff.lint.enable": true,
+  "ruff.importStrategy": "fromEnvironment",
+  /* Python testing configuration */
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  /* Python path configuration */
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.executeInFileDir": false,
+  /* Python environment for testing */
+  "python.experiments.optInto": ["pythonTestAdapter"],
+  /* toml file settings */
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    "editor.formatOnSave": true,
+  },
+  "evenBetterToml.taplo.configFile.enabled": true,
+  "evenBetterToml.taplo.configFile.path": "${workspaceFolder}/taplo.toml",
+  "markdown.extension.list.indentationSize": "inherit",
+  "markdown-preview-enhanced.breakOnSingleNewLine": false,
+}

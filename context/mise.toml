@@ -1,0 +1,9 @@
+[env]
+_.file = [
+    'context/_env',
+]
+_.path = []
+_.source = [
+    'context/_envrc',
+]
+

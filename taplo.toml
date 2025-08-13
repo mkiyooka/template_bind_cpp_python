@@ -1,0 +1,4 @@
+[formatting]
+allowed_blank_lines = 2
+indent_string = "    "
+column_width = 80

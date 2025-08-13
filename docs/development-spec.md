@@ -1,0 +1,30 @@
+# サブモジュール
+
+- Python開発
+    - [x] パッケージ管理ツールに`uv`を利用
+    - [x] パッケージ管理の設定ファイルは`pyproject.toml`を利用
+    - [ ] pytestによるテストを導入する
+- C++開発
+    - [x] Pythonのビルドシステムに`scikit_build_core`を利用して、`pip install`でビルド可能にする
+    - [x] C++コードのデバッグのため`cmake`から直接ビルド可能にする
+    - [x] CTestでテストによるテストを導入する
+    - [ ] コンソールで`gdb`を使ってデバッグするための設定をする
+    - [ ] VSCodeから`gdb`を使ってデバッグするための設定をする
+- 乱数生成クラスを実装
+    - [x] 使用言語: C++
+    - [x] `std::random`の`mt19937`を利用
+    - [x] $U[0,1)$に従う一様乱数$X \sim U[0,1)$を生成するためのクラス`rand`
+    - [ ] 同様のインターフェースで異なる分布に従う乱数生成器脳を準備して、乱数を利用する機能に依存性の注入ができるように実装する。
+    - [x] 初期化時にseed設定
+    - [x] `set_seed()`メソッドでseed番号を最初期化
+    - [x] `next()`メソッドで乱数を1つ生成
+- cliアプリを実装
+    - [x] 使用言語: Python
+    - [x] 使用パッケージ: typer (CLI実装)
+    - [x] `src/template_bind_cpp_python/cli.py`に`unif`コマンドを実装
+        - [x] C++で実装したrandクラスを呼び出し
+            - [x] 呼び出しにpybind11を利用
+            - [x] 呼び出しにnanobindを利用
+        - [x] `bind-demo unif`で乱数を1つ生成
+        - [x] `bind-demo unif N`で乱数をN個生成
+        - [x] `bind-demo unif --seed SEED N`でseedをSEEDに設定して乱数をN個生成
