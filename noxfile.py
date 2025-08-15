@@ -19,7 +19,7 @@ def pyright(session) -> None:
 
 
 @nox.session(python=["3.10", "3.11", "3.12", "3.13"], tags=["test"])
-def coverage(session) -> None:
+def test(session) -> None:
     session.install("-e", ".")
     session.install("pytest", "pytest-cov")
     session.run("pytest")
