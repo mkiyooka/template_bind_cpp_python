@@ -1,9 +1,7 @@
 [env]
-_.file = [
-    'context/_env',
-]
 _.path = []
-_.source = [
-    'context/_envrc',
-]
+_.file = []
+_.source = []
+_.python.venv = { path = ".venv", create = true }
 
+UV_NATIVE_TLS = true
