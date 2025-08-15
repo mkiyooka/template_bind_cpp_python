@@ -51,4 +51,14 @@ make -j
 
 ## 開発者向け
 
-[このプロジェクトの実装状況](docs/development-spec.md)
+[このプロジェクトの実装状況](docs/implementation-status.md)
+
+### compile_commands.josnの生成方法
+
+clang-tidyにコンパイルオプションに合わせて解析させるため、コンパイル時に発行されるコマンドを渡す。
+このときに利用する`compile_commands.josn`は次のコマンドで生成できる。
+
+``` sh
+mkdir build && cd build
+cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+```

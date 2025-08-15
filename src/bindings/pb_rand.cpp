@@ -1,7 +1,8 @@
 // rand.hppで宣言されたクラスをpybind11でバインドするコード
 
-#include "rand.hpp"
 #include <pybind11/pybind11.h>
+
+#include "rand.hpp"
 
 namespace py = pybind11;
 

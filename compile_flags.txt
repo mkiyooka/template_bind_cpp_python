@@ -1,0 +1,11 @@
+-Wall
+-Wextra
+-Wno-unknown-pragmas
+-Wno-unused
+-Wno-unused-parameter
+-Wno-sign-compare
+-std=c++17
+-I./include
+-I.venv/lib/python*/site-packages/nanobind/ext/robin_map/include
+-I.venv/lib/python*/site-packages/nanobind/include
+-I.venv/lib/python*/site-packages/pybind11/include

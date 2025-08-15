@@ -1,7 +1,8 @@
 // rand.hppで宣言されたクラスをpybind11でバインドするコード
 
-#include "rand.hpp"
 #include <nanobind/nanobind.h>
+
+#include "rand.hpp"
 
 namespace nb = nanobind;
 

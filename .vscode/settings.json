@@ -43,6 +43,14 @@
   "python.terminal.executeInFileDir": false,
   /* Python environment for testing */
   "python.experiments.optInto": ["pythonTestAdapter"],
+  /* C++ file settings */
+  "[cpp]": {
+    "editor.rulers": [120],
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+    "editor.formatOnSave": true,
+  },
+  "C_Cpp.formatting": "disabled", // use clangd
+  "C_Cpp.intelliSenseEngine": "disabled", // use clangd
   /* toml file settings */
   "[toml]": {
     "editor.defaultFormatter": "tamasfe.even-better-toml",
