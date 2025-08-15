@@ -1,0 +1,57 @@
+repos:
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.8.2  # Replace with latest tag
+    hooks:
+      - id: commitizen
+      - id: commitizen-branch
+        stages: [pre-push]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.2
+    hooks:
+      - id: ruff-check
+        types_or: [python, pyi]
+        args: ["--fix", "--show-fixes", "--exit-non-zero-on-fix"]
+      - id: ruff-format
+        types_or: [python, pyi]
+  - repo: local
+    hooks:
+    - id: nox-lite
+      name: nox
+      description: 'nox testing framework'
+      entry: nox --python 3.13
+      language: python
+      types_or: [python, pyi]
+      pass_filenames: false
+      stages: [pre-commit]
+      args: []
+      require_serial: false
+    - id: nox-full
+      name: nox
+      description: 'nox testing framework'
+      entry: nox
+      language: python
+      types_or: [python, pyi]
+      pass_filenames: false
+      stages: [pre-push]
+      args: []
+      require_serial: false
+    - id: pyright
+      name: pyright
+      description: 'pyright type checker'
+      entry: uv run --frozen pyright
+      language: system
+      types_or: [python, pyi]
+      pass_filenames: true
+      args: []
+      require_serial: false
+      stages: [pre-commit]
+    - id: pytest
+      name: pytest
+      description: 'pytest testing framework'
+      entry: pytest
+      language: python
+      types_or: [python, pyi]
+      pass_filenames: false
+      args: []
+      require_serial: false
+      stages: [pre-commit]
