@@ -1,12 +1,12 @@
 repos:
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.8.2  # Replace with latest tag
+    rev: v4.8.3
     hooks:
       - id: commitizen
       - id: commitizen-branch
         stages: [pre-push]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.2
+    rev: v0.12.9
     hooks:
       - id: ruff-check
         types_or: [python, pyi]
@@ -35,23 +35,13 @@ repos:
       stages: [pre-push]
       args: []
       require_serial: false
-    - id: pyright
-      name: pyright
-      description: 'pyright type checker'
-      entry: uv run --frozen pyright
-      language: system
-      types_or: [python, pyi]
-      pass_filenames: true
-      args: []
-      require_serial: false
-      stages: [pre-commit]
-    - id: pytest
-      name: pytest
-      description: 'pytest testing framework'
-      entry: pytest
+    - id: taplo
+      name: taplo
+      description: 'TOML language format and lint'
+      entry: taplo fmt
       language: python
-      types_or: [python, pyi]
-      pass_filenames: false
+      types: [toml]
+      pass_filenames: true
+      stages: [pre-commit]
       args: []
       require_serial: false
-      stages: [pre-commit]
