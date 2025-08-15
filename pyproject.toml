@@ -27,11 +27,7 @@ bind-demo = "template_bind_cpp_python.cli:app"
 
 [build-system]
 # cmakeと連携してビルドするにはビルドシステムとしてscikit-build-coreを指定する必要がある
-requires = [
-    "scikit_build_core>=0.8.0",
-    "pybind11",
-    "nanobind"
-]
+requires = ["scikit_build_core>=0.8.0", "pybind11", "nanobind"]
 build-backend = "scikit_build_core.build"
 
 [tool.commitizen]
