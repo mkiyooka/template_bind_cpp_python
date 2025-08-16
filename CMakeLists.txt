@@ -90,3 +90,35 @@ endif()
 if(${pybind11_FOUND})
     install(TARGETS ${PYBIND11_MODULE_NAME} LIBRARY DESTINATION ${CMAKE_PROJECT_NAME})
 endif()
+
+# clang-format
+find_program(CLANG_FORMAT_EXE clang-format)
+message(STATUS "Found clang-format: ${CLANG_FORMAT_EXE}")
+if(CLANG_FORMAT_EXE)
+    file(GLOB_RECURSE ALL_SOURCE_FILES
+         ${CMAKE_SOURCE_DIR}/src/**/*.cpp
+         ${CMAKE_SOURCE_DIR}/include/**/*.hpp
+         ${CMAKE_SOURCE_DIR}/include/**/*.h)
+
+    add_custom_target(format
+        COMMAND ${CLANG_FORMAT_EXE} -i ${ALL_SOURCE_FILES}
+        COMMENT "Formatting source code with clang-format"
+    )
+endif()
+
+# clang-tidy
+find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
+message(STATUS "Found clang-tidy: ${CLANG_TIDY_EXE}")
+if(CLANG_TIDY_EXE)
+    file(GLOB_RECURSE ALL_SOURCE_FILES
+         ${CMAKE_SOURCE_DIR}/src/core/*.cpp
+         ${CMAKE_SOURCE_DIR}/include/**/*.hpp
+         ${CMAKE_SOURCE_DIR}/include/**/*.h)
+    set(CMAKE_CXX_CLANG_TIDY
+        "${CLANG_TIDY_EXE}"
+    )
+    add_custom_target(lint
+        COMMAND ${CMAKE_CXX_CLANG_TIDY} ${ALL_SOURCE_FILES}
+        COMMENT "Running clang-tidy"
+    )
+endif()
