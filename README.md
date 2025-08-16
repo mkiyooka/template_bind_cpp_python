@@ -1,5 +1,7 @@
 # C++ and Python binding
 
+## 利用方法
+
 `uv pip install`でC++のコンパイルとpythonパッケージとしてのインストールを同時に実行する。
 
 ``` sh
@@ -43,3 +45,8 @@ clang-tidyにコンパイルオプションに合わせて解析させるため�
 cmake . -B _build -DCMAKE_EXPORT_COMPILE_COMMANDS=1
 cp _build/compile_commands.json ./
 ```
+
+## License
+
+This project is released under CC0 1.0 Universal.
+You can copy, modify, and use it freely without attribution.
