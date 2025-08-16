@@ -176,3 +176,6 @@ _build/
 
 # debug information files
 *.dwo
+
+# Compilation database
+compile_commands.json

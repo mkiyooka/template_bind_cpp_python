@@ -8,7 +8,7 @@ namespace nb = nanobind;
 
 // module_coreはCMakeLists.txtで指定されたモジュール名と合わせる。
 // 生成される共有ライブラリのプレフィックスにもこの名前が使用される。
-NB_MODULE(module_core, m) {
+NB_MODULE(_nanobind_module, m) {
     m.doc() = "nanobind lib";
 
     nb::class_<Rand>(m, "Rand")

@@ -8,7 +8,7 @@ namespace py = pybind11;
 
 // module_coreはCMakeLists.txtで指定されたモジュール名と合わせる。
 // 生成される共有ライブラリのプレフィックスにもこの名前が使用される。
-PYBIND11_MODULE(module_core, m) {
+PYBIND11_MODULE(_pybind11_module, m) {
     py::class_<Rand>(m, "Rand")
         .def(py::init<unsigned int>(), py::arg("seed") = 0, R"pbdoc(
             初期化乱数生成器をシードで初期化する(pybind11)

@@ -1,8 +1,10 @@
+#pragma once
+
 #include <random>
 
 class Rand {
 public:
-    Rand(unsigned int seed = 0)
+    explicit Rand(unsigned int seed = 0)
         : mt(seed) {}
     void set_seed(unsigned int seed);
     double next();

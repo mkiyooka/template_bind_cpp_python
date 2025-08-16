@@ -91,6 +91,7 @@ ignore = [
     "ANN401", # Dynamically typed expressions (Any) are disallowed
     "D400",   # First line should end with a period
     "D401",   # Relax NumPy docstring convention: first line should be imperative
+    "D403",   # Checks for docstrings that do not start with a capital letter.
     "E501",   # Line length regulated by formatter
     "PT011",  # pytest.raises is too broad, set match or use a more specific exception
     "PYI041", # Use float instead of int | float
