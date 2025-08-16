@@ -1,7 +1,5 @@
 # C++ and Python binding
 
-## nanobind
-
 `uv pip install`でC++のコンパイルとpythonパッケージとしてのインストールを同時に実行する。
 
 ``` sh
@@ -24,30 +22,11 @@ cmake ..
 make -j
 ```
 
-## pybind11
+## nanobind or pybind11
 
 C++17より古い環境ではnanobindの代わりにpybind11を利用す必要があります。
-環境変数`WITH_PYBIND11`を設定することでpybind11を使うように変更できます。
-
-``` sh
-git clone <repo>
-cd <dir>
-uv sync
-source .venv/bin/activate
-WITH_PYBIND11=True task build
-python examples/basic_usage.py
-```
-
-nanobindのときと同様にC++コードのデバッグのために以下の方法でCMakeで直接ビルドできます。
-
-``` sh
-git clone <repo>
-cd <dir>
-uv sync
-mkdir build && cd build
-WITH_PYBIND11=True cmake ..
-make -j
-```
+このテンプレートはnanobindとpybind11両方のサンプルを含んでいます。
+利用する環境にあわせてライブラリを選択してください。
 
 ## 開発者向け
 
@@ -59,6 +38,6 @@ clang-tidyにコンパイルオプションに合わせて解析させるため�
 このときに利用する`compile_commands.josn`は次のコマンドで生成できる。
 
 ``` sh
-mkdir build && cd build
-cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+cmake . -B _build -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+cp _build/compile_commands.json ./
 ```

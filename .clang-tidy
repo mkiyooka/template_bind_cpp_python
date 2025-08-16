@@ -4,23 +4,26 @@ Checks: >
   cert-*,
   clang-analyzer-*,
   cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-avoid-non-const-global-variables
   google-*,
+  -google-readability-todo,
   hicpp-*,
+  hicpp-explicit-conversions,
   llvm-*,
+  -llvm-header-guard,
   misc-*,
   modernize-*,
+  -modernize-use-trailing-return-type,
   performance-*,
   performance-avoid-endl,
   portability-*,
   readability-*,
-  -modernize-use-trailing-return-type,
+  -readability-identifier-length,
   -readability-magic-numbers,
-  -cppcoreguidelines-avoid-magic-numbers,
-  -google-readability-todo,
-  -cppcoreguidelines-avoid-non-const-global-variables
+
 
 WarningsAsErrors: ''
-HeaderFilterRegex: '.*'
 FormatStyle: file
 CheckOptions:
   - key: readability-identifier-naming.NamespaceCase

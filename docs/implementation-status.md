@@ -15,7 +15,7 @@
     - [x] CTestでテストによるテストを導入する
     - [ ] コンソールで`gdb`を使ってデバッグするための設定をする
     - [ ] VSCodeから`gdb`を使ってデバッグするための設定をする
-    - [ ] コードフォーマッタ導入: clangd, clang-format
+    - [x] コードフォーマッタ導入: clangd, clang-format
     - [ ] リンタ導入: clangd, clang-tidy
 - 乱数生成クラスを実装
     - [x] 使用言語: C++

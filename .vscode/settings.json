@@ -21,7 +21,9 @@
     "**/.pytest_cache": true,
     "**/__pycache__": true,
   },
-  /* Python file settings */
+  /* 
+   * Python file settings
+   */
   "[python]": {
     "editor.rulers": [80],
     "editor.formatOnSave": true,
@@ -43,7 +45,10 @@
   "python.terminal.executeInFileDir": false,
   /* Python environment for testing */
   "python.experiments.optInto": ["pythonTestAdapter"],
-  /* C++ file settings */
+
+  /*
+   * C++ file settings
+   */
   "[cpp]": {
     "editor.rulers": [120],
     "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
@@ -51,7 +56,16 @@
   },
   "C_Cpp.formatting": "disabled", // use clangd
   "C_Cpp.intelliSenseEngine": "disabled", // use clangd
-  /* toml file settings */
+  "C_Cpp.codeAnalysis.clangTidy.enabled": true,
+  "files.associations": {
+    ".clang-format": "yaml",
+    ".clang-tidy": "yaml",
+    ".clangd": "yaml"
+  },
+
+  /*
+   * toml file settings
+   */
   "[toml]": {
     "editor.defaultFormatter": "tamasfe.even-better-toml",
     "editor.formatOnSave": true,
