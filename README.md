@@ -9,6 +9,8 @@ uv sync
 source .venv/bin/activate
 uv pip install -e .
 python examples/basic_usage.py
+# デモ用のcliアプリは以下のコマンドで実行できる
+bind-demo --help
 ```
 
 C++コードのデバッグのために以下の方法でCMakeで直接ビルドできます。
