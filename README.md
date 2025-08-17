@@ -34,17 +34,10 @@ C++17より古い環境ではnanobindの代わりにpybind11を利用す必要�
 
 ## 開発者向け
 
-[このプロジェクトの実装状況](docs/implementation-status.md)
-
-### compile_commands.josnの生成方法
-
-clang-tidyにコンパイルオプションに合わせて解析させるため、コンパイル時に発行されるコマンドを渡す。
-このときに利用する`compile_commands.josn`は次のコマンドで生成できる。
-
-``` sh
-cmake . -B _build -DCMAKE_EXPORT_COMPILE_COMMANDS=1
-cp _build/compile_commands.json ./
-```
+- [ユーザ向けガイド](docs/user-guide.md)
+- [開発者向けガイド](docs/developer-guide.md)
+- [開発ルール](docs/development-rules.md)
+- [このプロジェクトの実装状況](docs/implementation-status.md)
 
 ## License
 
