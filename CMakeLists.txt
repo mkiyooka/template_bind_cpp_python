@@ -5,6 +5,7 @@ project(
     VERSION 0.1.0
     LANGUAGES CXX C
 )
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(MODULE_NAME module_core)
 
 # Define project-wide include directories.
@@ -91,34 +92,63 @@ if(${pybind11_FOUND})
     install(TARGETS ${PYBIND11_MODULE_NAME} LIBRARY DESTINATION ${CMAKE_PROJECT_NAME})
 endif()
 
-# clang-format
+# ----- Make file list for custom targets -----
+file(GLOB_RECURSE ALL_SOURCE_FILES
+    ${CMAKE_SOURCE_DIR}/src/**/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/**/*.c
+    ${CMAKE_SOURCE_DIR}/tests/**/*.cpp
+    ${CMAKE_SOURCE_DIR}/include/**/*.hpp
+    ${CMAKE_SOURCE_DIR}/include/**/*.h
+)
+foreach(src ${ALL_SOURCE_FILES})
+    if (NOT src MATCHES "/src/bindings/")
+        list(APPEND SOURCE_FILES_EXCLUDE_BINDING ${src})
+    endif()
+endforeach()
+
+# ----- Setup custom targets -----
+add_custom_target(check)
+
 find_program(CLANG_FORMAT_EXE clang-format)
 message(STATUS "Found clang-format: ${CLANG_FORMAT_EXE}")
 if(CLANG_FORMAT_EXE)
-    file(GLOB_RECURSE ALL_SOURCE_FILES
-         ${CMAKE_SOURCE_DIR}/src/**/*.cpp
-         ${CMAKE_SOURCE_DIR}/include/**/*.hpp
-         ${CMAKE_SOURCE_DIR}/include/**/*.h)
-
     add_custom_target(format
         COMMAND ${CLANG_FORMAT_EXE} -i ${ALL_SOURCE_FILES}
         COMMENT "Formatting source code with clang-format"
     )
+    add_custom_target(format-dry
+        COMMAND ${CLANG_FORMAT_EXE} --dry-run --Werror ${ALL_SOURCE_FILES}
+        COMMENT "Checking formatting (dry-run)"
+    )
+    add_dependencies(check format)
 endif()
 
-# clang-tidy
 find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
 message(STATUS "Found clang-tidy: ${CLANG_TIDY_EXE}")
 if(CLANG_TIDY_EXE)
-    file(GLOB_RECURSE ALL_SOURCE_FILES
-         ${CMAKE_SOURCE_DIR}/src/core/*.cpp
-         ${CMAKE_SOURCE_DIR}/include/**/*.hpp
-         ${CMAKE_SOURCE_DIR}/include/**/*.h)
     set(CMAKE_CXX_CLANG_TIDY
         "${CLANG_TIDY_EXE}"
     )
     add_custom_target(lint
-        COMMAND ${CMAKE_CXX_CLANG_TIDY} ${ALL_SOURCE_FILES}
+        COMMAND ${CMAKE_CXX_CLANG_TIDY} ${SOURCE_FILES_EXCLUDE_BINDING}
         COMMENT "Running clang-tidy"
     )
+    add_dependencies(check lint)
+endif()
+
+find_program(CPPCHECK cppcheck)
+if(CPPCHECK)
+    add_custom_target(run-cppcheck
+        COMMAND ${CPPCHECK}
+            --project=${CMAKE_BINARY_DIR}/compile_commands.json
+            -i.venv
+            -isrc/bindings
+            --enable=warning,style,performance,portability,information
+            --inconclusive
+            --error-exitcode=1
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running cppcheck"
+        VERBATIM
+    )
+    add_dependencies(check run-cppcheck)
 endif()

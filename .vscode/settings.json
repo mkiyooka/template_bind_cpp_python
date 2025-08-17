@@ -62,6 +62,7 @@
     ".clang-tidy": "yaml",
     ".clangd": "yaml"
   },
+  "cmake.buildDirectory": "${workspaceFolder}/_build",
 
   /*
    * toml file settings

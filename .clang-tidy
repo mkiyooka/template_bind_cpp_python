@@ -14,11 +14,13 @@ Checks: >
   -llvm-header-guard,
   misc-*,
   modernize-*,
+  -modernize-loop-convert,
   -modernize-use-trailing-return-type,
   performance-*,
   performance-avoid-endl,
   portability-*,
   readability-*,
+  readability-uppercase-literal-suffix,
   -readability-identifier-length,
   -readability-magic-numbers,
 
