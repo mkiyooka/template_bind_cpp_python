@@ -1,6 +1,6 @@
 # 実装状況
 
-- Python開発
+- Python開発環境
     - [x] パッケージ管理ツールに`uv`を利用
     - [x] パッケージ管理の設定ファイルは`pyproject.toml`を利用
     - [x] テスト導入: pytest
@@ -9,7 +9,7 @@
     - [x] リンタ導入: ruff check
     - [x] テスト導入: nox
     - [x] pre-commit導入
-- C++開発
+- C++開発環境
     - [x] Pythonのビルドシステムに`scikit_build_core`を利用して、`pip install`でビルド可能にする
     - [x] C++コードのデバッグのため`cmake`から直接ビルド可能にする
     - [x] CTestでテストによるテストを導入する
@@ -18,6 +18,8 @@
     - [x] コードフォーマッタ導入: clangd, clang-format (CMake経由で実行できるように設定)
     - [x] リンタ導入: clangd, clang-tidy (CMake経由で実行できるように設定)
     - [x] 静的解析ツール導入: cppcheck (CMake経由で実行できるように設定)
+- Pythonプログラム
+    - [ ] VSCodeから型ヒント
 - 乱数生成クラスを実装
     - [x] 使用言語: C++
     - [x] `std::random`の`mt19937`を利用

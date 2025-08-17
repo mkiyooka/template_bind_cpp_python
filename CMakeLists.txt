@@ -82,7 +82,15 @@ endif()
 
 # Install the Python module.
 if(${nanobind_FOUND})
-    install(TARGETS ${NANOBIND_MODULE_NAME} LIBRARY DESTINATION ${CMAKE_PROJECT_NAME})
+    install(TARGETS
+        ${NANOBIND_MODULE_NAME} LIBRARY
+        DESTINATION ${CMAKE_PROJECT_NAME}
+    )
+    install(FILES
+        $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/${NANOBIND_MODULE_NAME}.pyi
+        $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/py.typed
+        DESTINATION ${CMAKE_PROJECT_NAME}
+    )
 endif()
 
 if(${pybind11_FOUND})

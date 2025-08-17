@@ -11,6 +11,13 @@ if(${nanobind_FOUND})
     target_link_libraries(${NANOBIND_MODULE_NAME} PRIVATE
         rand_core
     )
+    nanobind_add_stub(${NANOBIND_MODULE_NAME}_stub
+        MODULE ${NANOBIND_MODULE_NAME}
+        OUTPUT ${NANOBIND_MODULE_NAME}.pyi
+        MARKER_FILE py.typed
+        PYTHON_PATH $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>
+        DEPENDS ${NANOBIND_MODULE_NAME}
+    )
 endif()
 
 if(${pybind11_FOUND})
