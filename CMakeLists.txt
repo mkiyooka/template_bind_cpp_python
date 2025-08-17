@@ -1,7 +1,6 @@
 # CMake >= 3.15 for scikit-build-core
 cmake_minimum_required(VERSION 3.15)
-project(
-    template_bind_cpp_python
+project(template_bind_cpp_python
     VERSION 0.1.0
     LANGUAGES CXX C
 )
@@ -42,16 +41,14 @@ if (CMAKE_VERSION VERSION_LESS 3.18)
 else()
     set(DEV_MODULE Development.Module)
 endif()
-find_package(
-    Python 3.8
+find_package(Python 3.8
     REQUIRED COMPONENTS Interpreter ${DEV_MODULE}
     OPTIONAL_COMPONENTS Development.SABIModule
 )
 message(STATUS "python executable: ${Python_EXECUTABLE}")
 
 message(STATUS "Using nanobind")
-execute_process(
-    COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+execute_process(COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
     OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT
     RESULT_VARIABLE nanobind_RESULT
 )
