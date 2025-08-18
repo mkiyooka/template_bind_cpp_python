@@ -7,8 +7,17 @@ project(template_bind_cpp_python
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(MODULE_NAME module_core)
 
+# Force -O0 for Debug builds
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0" CACHE STRING "Flags used by the CXX compiler for debug builds." FORCE)
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0" CACHE STRING "Flags used by the C compiler for debug builds." FORCE)
+    message(STATUS "Forcing -O0 for Debug build type.")
+endif()
+
 # Define project-wide include directories.
 set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(ENV{VIRTUAL_ENV} "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
+set(Python_FIND_VIRTUALENV FIRST)
 message(STATUS "Using virtual environment: $ENV{VIRTUAL_ENV}")
 
 # Enable testing for CTest.
@@ -45,7 +54,7 @@ find_package(Python 3.8
     REQUIRED COMPONENTS Interpreter ${DEV_MODULE}
     OPTIONAL_COMPONENTS Development.SABIModule
 )
-message(STATUS "python executable: ${Python_EXECUTABLE}")
+message(STATUS "Using python: ${Python_EXECUTABLE}")
 
 message(STATUS "Using nanobind")
 execute_process(COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
@@ -61,8 +70,6 @@ execute_process(
     COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmakedir
     OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE pybind11_ROOT
     RESULT_VARIABLE pybind11_RESULT
-    OUTPUT_QUIET
-    ERROR_QUIET
 )
 set(pybind11_FOUND FALSE)
 add_binding_system(pybind11 pybind11_FOUND)
@@ -75,9 +82,16 @@ add_subdirectory(tests/cpp)
 
 # Set default build type.
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Setting default build type to Release")
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+    message(STATUS "Setting default build type to Debug for debugging")
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
+# Add debug flags for Debug and RelWithDebInfo builds
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0")
+    message(STATUS "Debug symbols enabled for CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 endif()
 
 # Install the Python module.
@@ -157,3 +171,4 @@ if(CPPCHECK)
     )
     add_dependencies(check run-cppcheck)
 endif()
+

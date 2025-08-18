@@ -95,3 +95,134 @@ task test
 ---
 
 開発に関するルールは [開発ルール](development-rules.md) を参照してください。
+
+## C++デバッグ
+
+### コンソールでのLLDBデバッグ
+
+1. **デバッグビルドの実行**:
+    デバッグシンボルを有効にしてプロジェクトをビルドします。
+
+    ```bash
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+    cmake --build build
+    ```
+
+    これにより、`build`ディレクトリにデバッグ情報を含む実行可能ファイルが生成されます。
+
+2. **LLDBの起動**:
+
+    ビルドされた実行可能ファイルに対して`lldb`を起動します。例えば、デバッグ用の実行可能ファイルをデバッグする場合:
+
+    ```bash
+    lldb build/src/core/debug_rand
+    ```
+
+3. **LLDBコマンド**:
+    - `b <ファイル名>:<行番号>`: ブレークポイントを設定します。例: `b src/core/rand.cpp:5`
+    - `run`: プログラムを実行します。
+    - `next`: 次の行に進みます（関数呼び出しをステップオーバー）。
+    - `step`: 次の行に進みます（関数呼び出しにステップイン）。
+    - `p <変数名>`: 変数の値を表示します。
+    - `l`: 現在のコードの周囲を表示します。
+    - `c`: 次のブレークポイントまで実行を続行します。
+    - `q`: LLDBを終了します。
+
+### VSCodeでのLLDBデバッグ
+
+1. **`.vscode/launch.json` の作成**:
+    VSCodeでC++デバッグを設定するには、プロジェクトのルートディレクトリに`.vscode/launch.json`ファイルを作成します。以下は`debug_rand`実行可能ファイルをデバッグするための設定例です。
+
+    ```json:launch.json
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Launch debug_rand",
+                "type": "cppdbg",
+                "request": "launch",
+                "program": "${workspaceFolder}/build/src/core/debug_rand",
+                "args": [],
+                "stopAtEntry": false,
+                "cwd": "${workspaceFolder}",
+                "environment": [],
+                "externalConsole": false,
+                "osx": {
+                    "MIMode": "lldb"
+                },
+                "linux": {
+                    "MIMode": "gdb"
+                },
+                "setupCommands": [
+                    {
+                        "description": "Enable pretty-printing for lldb",
+                        "text": "-enable-pretty-printing",
+                        "ignoreFailures": true
+                    }
+                ],
+                "preLaunchTask": "cmake_for_debug",
+            }
+        ]
+    }
+    ```
+
+2. **`tasks.json` の作成 (オプション)**:
+    `launch.json` で `preLaunchTask` を使用する場合、`.vscode/tasks.json` ファイルでビルドタスクを定義する必要があります。
+
+    ```json
+    {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "cmake_for_debug",
+                "type": "shell",
+                "command": "cmake",
+                "args": [
+                    "-S.",
+                    "-Bbuild",
+                    "-DCMAKE_BUILD_TYPE=Debug",
+                    "-DPython_EXECUTABLE=${workspaceFolder}/.venv/bin/python"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}",
+                    "env": {
+                        "VIRTUAL_ENV": "${workspaceFolder}/.venv",
+                        "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
+                    }
+                },
+                "group": {
+                    "kind": "build",
+                    "isDefault": false
+                },
+                "detail": "CMakeを使ってデバッグ用セットアップを実行"
+            },
+            {
+                "label": "build_for_debug",
+                "type": "shell",
+                "command": "cmake",
+                "args": [
+                    "--build",
+                    "${workspaceFolder}/build",
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder}",
+                    "env": {
+                        "VIRTUAL_ENV": "${workspaceFolder}/.venv",
+                        "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
+                    }
+                },
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                },
+                "detail": "CMakeを使ってデバッグ用ビルドを実行",
+                "dependsOn": [
+                    "cmake_for_debug"
+                ]
+            },
+        ]
+    }
+    ```
+
+3. **デバッグの開始**:
+    VSCodeの「実行とデバッグ」ビューに移動し、「Launch debug_rand」設定を選択してデバッグを開始します。
