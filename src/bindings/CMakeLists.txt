@@ -19,15 +19,3 @@ if(${nanobind_FOUND})
         DEPENDS ${NANOBIND_MODULE_NAME}
     )
 endif()
-
-if(${pybind11_FOUND})
-    message(STATUS "Building pybind11 bindings")
-    pybind11_add_module(${PYBIND11_MODULE_NAME}
-        MODULE
-        pb_rand.cpp
-    )
-    target_link_libraries(${PYBIND11_MODULE_NAME} PRIVATE
-        pybind11::headers
-        rand_core
-    )
-endif()

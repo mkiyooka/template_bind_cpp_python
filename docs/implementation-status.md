@@ -53,6 +53,8 @@
     - [x] C++で実装したrandクラスを呼び出し
         - [x] 呼び出しにpybind11を利用
         - [x] 呼び出しにnanobindを利用
+        - [x] nanobindをpip/venv経由ではなくsubmoduleとする方針に変更
+        - [x] pybind11は採用は中止してnanobindに一本化する
     - [x] `bind-demo unif`で乱数を1つ生成
     - [x] `bind-demo unif N`で乱数をN個生成
     - [x] `bind-demo unif --seed SEED N`でseedをSEEDに設定して乱数をN個生成

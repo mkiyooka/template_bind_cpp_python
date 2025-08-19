@@ -1,21 +1,9 @@
-from template_bind_cpp_python import nb_rand, pb_rand  # ignore[import]
+from template_bind_cpp_python import Rand  # ignore[import]
 
 
-def test_pb_rand() -> None:
+def test_Rand() -> None:
     """Test Rand class"""
-    r = pb_rand(42)
-    v1 = r.next()
-    assert v1 is not None
-    assert 0 < v1 < 1
-
-    r.set_seed(42)
-    v2 = r.next()
-    assert v1 == v2
-
-
-def test_nb_rand() -> None:
-    """Test Rand class"""
-    r = nb_rand(42)
+    r = Rand(42)
     v1 = r.next()
     assert v1 is not None
     assert 0 < v1 < 1

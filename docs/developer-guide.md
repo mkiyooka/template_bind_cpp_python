@@ -2,6 +2,14 @@
 
 このプロジェクトはC++/Pythonバインディングを含む複合プロジェクトです。環境構築・ビルド・品質管理の手順をまとめます。
 
+## プロジェクト入手
+
+``` sh
+git clone <repo>
+cd <dir>
+git submodule update --init --recursive
+```
+
 ## 環境セットアップ（uv sync）
 
 1. Python環境は [uv](https://github.com/astral-sh/uv) を利用します。

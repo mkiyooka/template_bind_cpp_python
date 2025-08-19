@@ -23,25 +23,6 @@ message(STATUS "Using virtual environment: $ENV{VIRTUAL_ENV}")
 # Enable testing for CTest.
 enable_testing()
 
-function(add_binding_system BINDING_SYSTEM BINDING_SYSTEM_FOUND)
-    if(${BINDING_SYSTEM}_RESULT EQUAL 0)
-        # 1. If installed via pip/conda, use find_package to locate BINDING_SYSTEM.
-        message(STATUS "${BINDING_SYSTEM} found via ${Python_EXECUTABLE}, using pip/conda")
-        message(STATUS "nanobind_DIR: ${nanobind_DIR}")
-        find_package(${BINDING_SYSTEM} CONFIG REQUIRED)
-        set(${BINDING_SYSTEM_FOUND} TRUE PARENT_SCOPE)
-    elseif(EXISTS "${CMAKE_SOURCE_DIR}/ext/${BINDING_SYSTEM}/CMakeLists.txt")
-        ## 2. If added as Git submodule, use add_subdirectory.
-        message(STATUS "${BINDING_SYSTEM} not found via ${Python_EXECUTABLE}, trying local submodule")
-        add_subdirectory(ext/${BINDING_SYSTEM} REQUIRED)
-        set(${BINDING_SYSTEM_FOUND} TRUE PARENT_SCOPE)
-    else()
-        message(FATAL_ERROR
-            "${BINDING_SYSTEM} not found via ${Python_EXECUTABLE} and no local submodule in ext/${BINDING_SYSTEM}")
-        set(${BINDING_SYSTEM_FOUND} FALSE PARENT_SCOPE)
-    endif()
-endfunction()
-
 # Unset default Python, set .venv Python
 unset(Python_EXECUTABLE)
 # Find Python and binding libraries.
@@ -56,27 +37,24 @@ find_package(Python 3.8
 )
 message(STATUS "Using python: ${Python_EXECUTABLE}")
 
+# --- search nanobind ---
 message(STATUS "Using nanobind")
 execute_process(COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
     OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT
     RESULT_VARIABLE nanobind_RESULT
 )
-set(nanobind_FOUND FALSE)
-add_binding_system(nanobind nanobind_FOUND)
-
-message(STATUS "Using pybind11")
-set(PYBIND11_FINDPYTHON ON)
-execute_process(
-    COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmakedir
-    OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE pybind11_ROOT
-    RESULT_VARIABLE pybind11_RESULT
-)
-set(pybind11_FOUND FALSE)
-add_binding_system(pybind11 pybind11_FOUND)
+if(EXISTS "${CMAKE_SOURCE_DIR}/ext/nanobind/CMakeLists.txt")
+    message(STATUS "nanobind not found via ${Python_EXECUTABLE}, trying local submodule")
+    add_subdirectory(ext/nanobind REQUIRED)
+    set(nanobind_FOUND TRUE)
+else()
+    message(FATAL_ERROR
+        "nanobind not found via ${Python_EXECUTABLE} and no local submodule in ext/nanobind")
+    set(nanobind_FOUND FALSE)
+endif()
 
 add_subdirectory(src/core)
 set(NANOBIND_MODULE_NAME _nanobind_module)
-set(PYBIND11_MODULE_NAME _pybind11_module)
 add_subdirectory(src/bindings)
 add_subdirectory(tests/cpp)
 
@@ -105,10 +83,6 @@ if(${nanobind_FOUND})
         $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/py.typed
         DESTINATION ${CMAKE_PROJECT_NAME}
     )
-endif()
-
-if(${pybind11_FOUND})
-    install(TARGETS ${PYBIND11_MODULE_NAME} LIBRARY DESTINATION ${CMAKE_PROJECT_NAME})
 endif()
 
 # ----- Make file list for custom targets -----
