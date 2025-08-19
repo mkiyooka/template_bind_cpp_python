@@ -7,6 +7,7 @@
 ``` sh
 git clone <repo>
 cd <dir>
+it submodule update --init --recursive
 uv sync
 source .venv/bin/activate
 uv pip install -e .
@@ -20,6 +21,7 @@ C++コードのデバッグのために以下の方法でCMakeで直接ビルド
 ``` sh
 git clone <repo>
 cd <dir>
+it submodule update --init --recursive
 uv sync
 mkdir build && cd build
 cmake ..
