@@ -2,7 +2,7 @@
 
 import typer
 
-from template_bind_cpp_python import nb_rand, pb_rand  # type: ignore[import]
+from template_bind_cpp_python import Rand  # type: ignore[import]
 
 try:
     from template_bind_cpp_python import __version__  # type: ignore[import]
@@ -13,28 +13,13 @@ except ImportError:
 app = typer.Typer()
 
 
-@app.command("nb_unif")
-def nb_unif(n: int = typer.Argument(1, help="1st number"), seed: int = 0) -> None:
+@app.command("rand")
+def rand(n: int = typer.Argument(1, help="1st number"), seed: int = 0) -> None:
     """nanobind 一様乱数をn個生成。seed指定可能。"""
-    if nb_rand is None:
+    if Rand is None:
         print("nanobind module is not available.")
         return
-    r = nb_rand(seed or 0)
-    if seed is not None:
-        r.set_seed(seed)
-    for _ in range(n):
-        print(r.next())
-
-
-@app.command("pb_unif")
-def pb_unif(
-    n: int = typer.Argument(1, help="1st number"), seed: int | None = None
-) -> None:
-    """pybind11 一様乱数をn個生成。seed指定可能。"""
-    if pb_rand is None:
-        print("pybind11 module is not available.")
-        return
-    r = pb_rand(seed or 0)
+    r = Rand(seed or 0)
     if seed is not None:
         r.set_seed(seed)
     for _ in range(n):
