@@ -1,38 +1,57 @@
-# C++ and Python binding
+# C++ テンプレートバインディングプロジェクト (nanobind)
 
-## 利用方法
+C++とPythonをnanobindでバインディングするテンプレートプロジェクトです。ハミング距離計算の高速化と汎用関数の実装例を含みます。
 
-`uv pip install`でC++のコンパイルとpythonパッケージとしてのインストールを同時に実行する。
+## クイックスタート
 
-``` sh
+```bash
 git clone <repo>
 cd <dir>
-it submodule update --init --recursive
+git submodule update --init --recursive
 uv sync
-source .venv/bin/activate
+unset CC CXX  # LLVM環境がある場合はリセット
 uv pip install -e .
-python examples/basic_usage.py
-# デモ用のcliアプリは以下のコマンドで実行できる
-bind-demo --help
+python scripts/benchmark_hamming.py
 ```
 
-C++コードのデバッグのために以下の方法でCMakeで直接ビルドできます。
+### 💡 トラブルシューティング
 
-``` sh
-git clone <repo>
-cd <dir>
-it submodule update --init --recursive
-uv sync
+**モジュールインポートエラーが発生する場合:**
+```bash
+# ビルド環境をリセットして再ビルド
+unset CC CXX
+rm -rf build/ .venv/lib/python*/site-packages/template_bind_cpp_python*
+uv pip install -e .
+```
+
+## 機能
+
+### ハミング距離計算 (HammingDistanceCalculator)
+- C++実装による高速ハミング距離計算
+- データ転送と計算処理の分離設計
+- Python実装との性能比較機能
+
+### シンプル関数 (Simple Functions)
+- 整数・浮動小数点数の加算関数
+- テンプレート関数の実装例
+- nanobindを用いたバインディング例
+
+## 開発用ビルド
+
+C++デバッグ用にCMakeから直接ビルド:
+
+```bash
 mkdir build && cd build
 cmake ..
 make -j
 ```
 
-## nanobind or pybind11
+## 技術仕様
 
-C++17より古い環境ではnanobindの代わりにpybind11を利用す必要があります。
-このテンプレートはnanobindとpybind11両方のサンプルを含んでいます。
-利用する環境にあわせてライブラリを選択してください。
+- **バインディング**: nanobind (submodule)
+- **ビルドシステム**: scikit-build-core + CMake
+- **パッケージ管理**: uv
+- **C++標準**: C++17
 
 ## 開発者向け
 

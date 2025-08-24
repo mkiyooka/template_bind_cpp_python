@@ -1,99 +1,59 @@
 {
     "version": "2.0.0",
+    "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+            "VIRTUAL_ENV": "${workspaceFolder}/.venv",
+            "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
+        }
+    },
     "tasks": [
         {
-            "label": "cmake_for_debug",
+            "label": "cmake_configure",
             "type": "shell",
             "command": "cmake",
             "args": [
                 "-S.",
                 "-Bbuild",
-                "-DCMAKE_BUILD_TYPE=Debug",
+                "-DCMAKE_BUILD_TYPE=${input:buildType}",
                 "-DPython_EXECUTABLE=${workspaceFolder}/.venv/bin/python"
             ],
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "VIRTUAL_ENV": "${workspaceFolder}/.venv",
-                    "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
-                }
-            },
             "group": {
                 "kind": "build",
                 "isDefault": false
             },
-            "detail": "CMakeを使ってデバッグ用セットアップを実行"
+            "detail": "CMakeでビルドタイプを指定してセットアップを実行"
         },
         {
-            "label": "cmake_for_release",
-            "type": "shell",
-            "command": "cmake",
-            "args": [
-                "-S.",
-                "-Bbuild",
-                "-DCMAKE_BUILD_TYPE=Release",
-                "-DPython_EXECUTABLE=${workspaceFolder}/.venv/bin/python"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "VIRTUAL_ENV": "${workspaceFolder}/.venv",
-                    "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "detail": "CMakeを使ってリリース用セットアップを実行"
-        },
-        {
-            "label": "build_for_debug",
-            "type": "shell",
-            "command": "cmake",
-            "args": [
-                "--build",
-                "${workspaceFolder}/build",
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "VIRTUAL_ENV": "${workspaceFolder}/.venv",
-                    "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
-                }
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "detail": "CMakeを使ってデバッグ用ビルドを実行",
-            "dependsOn": [
-                "cmake_for_debug"
-            ]
-        },
-        {
-            "label": "build_for_release",
+            "label": "cmake_build",
             "type": "shell",
             "command": "cmake",
             "args": [
                 "--build",
                 "${workspaceFolder}/build"
             ],
-            "options": {
-                "cwd": "${workspaceFolder}",
-                "env": {
-                    "VIRTUAL_ENV": "${workspaceFolder}/.venv",
-                    "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
-                }
-            },
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             },
-            "detail": "CMakeを使ってリリース用ビルドを実行",
+            "detail": "CMakeでビルドを実行",
             "dependsOn": [
-                "cmake_for_release"
+                "cmake_configure"
             ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "buildType",
+            "description": "Select build type",
+            "type": "pickString",
+            "options": [
+                "Debug",
+                "Release",
+                "RelWithDebInfo",
+                "MinSizeRel"
+            ],
+            "default": "Debug"
         }
     ]
 }

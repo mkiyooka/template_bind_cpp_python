@@ -13,6 +13,7 @@
     "**/.ruff_cache": true,
     "**/.pytest_cache": true,
     "**/__pycache__": true,
+    "**/ext": true
   },
   "search.exclude": {
     "**/.venv": true,
@@ -20,6 +21,7 @@
     "**/.ruff_cache": true,
     "**/.pytest_cache": true,
     "**/__pycache__": true,
+    "**/ext": true
   },
   /* 
    * Python file settings

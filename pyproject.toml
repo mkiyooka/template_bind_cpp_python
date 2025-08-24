@@ -25,8 +25,15 @@ bind-demo = "template_bind_cpp_python.cli:app"
 
 [build-system]
 # cmakeと連携してビルドするにはビルドシステムとしてscikit-build-coreを指定する必要がある
-requires = ["scikit_build_core>=0.8.0", "pybind11", "nanobind"]
+requires = ["scikit_build_core>=0.8.0", "nanobind"]
 build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+# nanobind settings
+wheel.py-api = "cp312"
+
+# Set default build type to Release for scikit-build-core
+cmake.build-type = "Release"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -93,6 +100,7 @@ ignore = [
     "E501",   # Line length regulated by formatter
     "PT011",  # pytest.raises is too broad, set match or use a more specific exception
     "PYI041", # Use float instead of int | float
+    "PYI021", # docstring-in-stub
     "RUF022", # `__all__` is not sorted
     "RUF005", # Consider expression instead of concatenation
     "SIM108", # Use ternary operator

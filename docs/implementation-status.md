@@ -1,60 +1,53 @@
 # 実装状況
 
-## Python開発環境
+nanobindを使用したC++/Pythonテンプレートバインディングプロジェクトの実装状況です。
 
-- [x] パッケージ管理ツールに`uv`を利用
-- [x] パッケージ管理の設定ファイルは`pyproject.toml`を利用
-- [x] テスト導入: pytest
-- [x] 型チェック導入: pyright
-- [x] コードフォーマッタ導入: ruff format
-- [x] リンタ導入: ruff check
-- [x] テスト導入: nox
-- [x] pre-commit導入
+## 🎯 主要機能（実装済み）
 
-## C++開発環境
+### ハミング距離計算ライブラリ
+- ✅ **HammingDistanceCalculator クラス** - C++実装の高速計算
+- ✅ **Python実装比較** - builtin実装との性能ベンチマーク
+- ✅ **nanobindバインディング** - submodule統合済み
 
-- [x] Pythonのビルドシステムに`scikit_build_core`を利用して、`pip install`でビルド可能にする
-- [x] C++コードのデバッグのため`cmake`から直接ビルド可能にする
-- [x] CTestによるテストを導入する
-- [x] コンソールで`gdb/lldb`を使ってデバッグするための設定
-    - [x] `CMakeLists.txt` にデバッグシンボルを生成する設定を追加
-    - [x] `gdb/lldb` で実行可能なバイナリをビルドする手順を確立
-    - [x] `gdb/lldb` を使ってC++コードをデバッグする手順をドキュメント化
-- [x] VSCodeから`gdb/lldb`を使ってデバッグするための設定
-    - [x] `.vscode/tasks.json` を作成し、デバッグ用ビルド設定を追加
-    - [x] `.vscode/launch.json` を作成し、デバッグ設定を追加
-    - [x] VSCodeからC++コードをデバッグする手順をドキュメント化
-    - [x] VSCode cmake extensionでの自動ビルド失敗不具合を修正
-- [x] コードフォーマッタ導入: clangd, clang-format (CMake経由で実行できるように設定)
-- [x] リンタ導入: clangd, clang-tidy (CMake経由で実行できるように設定)
-- [x] 静的解析ツール導入: cppcheck (CMake経由で実行できるように設定)
+### シンプル関数ライブラリ  
+- ✅ **基本関数** - 整数・浮動小数点加算
+- ✅ **テンプレート関数** - ジェネリック型対応
+- ✅ **nanobindバインディング** - 完全バインド済み
 
-## Pythonプログラム
+## 🔧 開発環境（実装済み）
 
-- [ ] VSCodeでの型ヒント対応
-    - [ ] `src/template_bind_cpp_python/__init__.pyi` の内容を整備
-    - [ ] `pyright` の設定を確認し、必要であれば修正
-    - [ ] VSCodeで型ヒントが正しく表示されることを確認
+### Python環境
+- ✅ **uv** - パッケージ管理・仮想環境
+- ✅ **ruff** - フォーマット・リント
+- ✅ **pyright** - 型チェック  
+- ✅ **pytest** - テストフレームワーク
+- ✅ **pre-commit** - コミット前チェック
 
-## 乱数生成クラスの実装
+### C++環境
+- ✅ **scikit-build-core** - Pythonビルド統合
+- ✅ **CMake** - 直接ビルド対応
+- ✅ **clang-format/clang-tidy** - CMakeターゲット統合
+- ✅ **cppcheck** - 静的解析（bindings除外対応）
+- ✅ **VSCode デバッグ** - launch.json/tasks.json設定済み
 
-- [x] 使用言語: C++
-- [x] `std::random`の`mt19937`を利用
-- [x] $U[0,1)$ に従う一様乱数 $X \sim U[0,1)$ を生成するためのクラス`rand`
-- [x] 初期化時にseed設定
-- [x] `set_seed()`メソッドでseed番号を再初期化
-- [x] `next()`メソッドで乱数を1つ生成
+### 品質管理
+- ✅ **make check** - C++全品質チェック統合
+- ✅ **task check** - Python全品質チェック統合
+- ✅ **CTest** - C++単体テスト
 
-## CLIアプリの実装
+## 📝 ドキュメント（整備済み）
 
-- [x] 使用言語: Python
-- [x] 使用パッケージ: typer (CLI実装)
-- [x] `src/template_bind_cpp_python/cli.py`に`unif`コマンドを実装
-    - [x] C++で実装したrandクラスを呼び出し
-        - [x] 呼び出しにpybind11を利用
-        - [x] 呼び出しにnanobindを利用
-        - [x] nanobindをpip/venv経由ではなくsubmoduleとする方針に変更
-        - [x] pybind11は採用は中止してnanobindに一本化する
-    - [x] `bind-demo unif`で乱数を1つ生成
-    - [x] `bind-demo unif N`で乱数をN個生成
-    - [x] `bind-demo unif --seed SEED N`でseedをSEEDに設定して乱数をN個生成
+- ✅ **README.md** - プロジェクト概要・クイックスタート
+- ✅ **user-guide.md** - エンドユーザー向けガイド  
+- ✅ **developer-guide.md** - 開発環境構築・デバッグ手順
+- ✅ **development-rules.md** - コーディング規約
+
+## ⚠️ 型ヒント対応状況
+
+- ❌ **開発時型ヒント** - `src/template_bind_cpp_python/` に`.pyi`なし
+- ✅ **インストール後型ヒント** - `uv pip install -e .` で型ヒント利用可能
+
+## 🚀 今後の機能拡張候補
+
+- [ ] **パフォーマンステスト** - 自動ベンチマーク  
+- [ ] **Python API拡張** - より多様な関数例

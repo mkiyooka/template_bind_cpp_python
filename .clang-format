@@ -18,3 +18,5 @@ PackConstructorInitializers: Never # >= 14
 # インクルード順序
 SortIncludes: CaseSensitive # >= 4
 IncludeBlocks: Preserve # >= 6
+
+IndentPPDirectives: AfterHash # > 6

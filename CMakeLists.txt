@@ -1,18 +1,30 @@
 # CMake >= 3.15 for scikit-build-core
 cmake_minimum_required(VERSION 3.15)
+
+# LLVM環境変数検出とツールチェーン自動選択
+if(DEFINED ENV{CC} AND "$ENV{CC}" MATCHES "llvm@14")
+    message(STATUS "Detected LLVM14 environment via CC: $ENV{CC}")
+    # コンパイラのみLLVM14を使用、アーカイバ・リンカはシステム標準を使用（macOS互換性のため）
+    set(CMAKE_C_COMPILER "$ENV{CC}" CACHE FILEPATH "C compiler" FORCE)
+    set(CMAKE_CXX_COMPILER "$ENV{CXX}" CACHE FILEPATH "C++ compiler" FORCE)
+    # macOS互換性のためシステム標準のarを使用
+    find_program(SYSTEM_AR ar PATHS /usr/bin /bin NO_DEFAULT_PATH)
+    find_program(SYSTEM_RANLIB ranlib PATHS /usr/bin /bin NO_DEFAULT_PATH)
+    if(SYSTEM_AR)
+        set(CMAKE_AR "${SYSTEM_AR}" CACHE FILEPATH "Archiver" FORCE)
+    endif()
+    if(SYSTEM_RANLIB)
+        set(CMAKE_RANLIB "${SYSTEM_RANLIB}" CACHE FILEPATH "Ranlib" FORCE)
+    endif()
+    message(STATUS "Using LLVM14 compilers with system ar/ranlib for macOS compatibility")
+endif()
+
 project(template_bind_cpp_python
     VERSION 0.1.0
     LANGUAGES CXX C
 )
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(MODULE_NAME module_core)
-
-# Force -O0 for Debug builds
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0" CACHE STRING "Flags used by the CXX compiler for debug builds." FORCE)
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0" CACHE STRING "Flags used by the C compiler for debug builds." FORCE)
-    message(STATUS "Forcing -O0 for Debug build type.")
-endif()
 
 # Define project-wide include directories.
 set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -39,56 +51,57 @@ message(STATUS "Using python: ${Python_EXECUTABLE}")
 
 # --- search nanobind ---
 message(STATUS "Using nanobind")
-execute_process(COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
-    OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT
-    RESULT_VARIABLE nanobind_RESULT
-)
-if(EXISTS "${CMAKE_SOURCE_DIR}/ext/nanobind/CMakeLists.txt")
-    message(STATUS "nanobind not found via ${Python_EXECUTABLE}, trying local submodule")
-    add_subdirectory(ext/nanobind REQUIRED)
-    set(nanobind_FOUND TRUE)
-else()
-    message(FATAL_ERROR
-        "nanobind not found via ${Python_EXECUTABLE} and no local submodule in ext/nanobind")
-    set(nanobind_FOUND FALSE)
-endif()
+add_subdirectory(ext/nanobind REQUIRED)
 
 add_subdirectory(src/core)
 set(NANOBIND_MODULE_NAME _nanobind_module)
 add_subdirectory(src/bindings)
-add_subdirectory(tests/cpp)
+
+# テストとデバッグターゲットはscikit-build環境では除外
+if(NOT SKBUILD)
+    add_subdirectory(tests/cpp)
+    add_subdirectory(debug)
+endif()
 
 # Set default build type.
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Setting default build type to Debug for debugging")
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+    message(STATUS "Setting default build type to Release")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
 # Add debug flags for Debug and RelWithDebInfo builds
-if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0")
     message(STATUS "Debug symbols enabled for CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g -O2")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -g -O2")
+    message(STATUS "Release with debug symbols enabled for CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 endif()
 
 # Install the Python module.
-if(${nanobind_FOUND})
-    install(TARGETS
-        ${NANOBIND_MODULE_NAME} LIBRARY
-        DESTINATION ${CMAKE_PROJECT_NAME}
-    )
-    install(FILES
-        $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/${NANOBIND_MODULE_NAME}.pyi
-        $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/py.typed
-        DESTINATION ${CMAKE_PROJECT_NAME}
-    )
-endif()
+install(TARGETS
+    ${NANOBIND_MODULE_NAME} LIBRARY
+    DESTINATION ${CMAKE_PROJECT_NAME}
+)
+install(FILES
+    $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/${NANOBIND_MODULE_NAME}.pyi
+    DESTINATION ${CMAKE_PROJECT_NAME}
+    OPTIONAL
+)
+install(FILES
+    $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/py.typed
+    DESTINATION ${CMAKE_PROJECT_NAME}
+)
 
 # ----- Make file list for custom targets -----
 file(GLOB_RECURSE ALL_SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/src/**/*.cpp
     ${CMAKE_SOURCE_DIR}/src/**/*.c
+    ${CMAKE_SOURCE_DIR}/debug/**/*.cpp
+    ${CMAKE_SOURCE_DIR}/debug/**/*.c
     ${CMAKE_SOURCE_DIR}/tests/**/*.cpp
     ${CMAKE_SOURCE_DIR}/include/**/*.hpp
     ${CMAKE_SOURCE_DIR}/include/**/*.h
@@ -102,7 +115,21 @@ endforeach()
 # ----- Setup custom targets -----
 add_custom_target(check)
 
-find_program(CLANG_FORMAT_EXE clang-format)
+# clang-format: 個別インストール版を優先、次にLLVMバージョン
+find_program(CLANG_FORMAT_EXE 
+    NAMES clang-format
+    PATHS 
+        /opt/homebrew/bin                    # brew install clang-format
+        /opt/homebrew/opt/llvm/bin          # brew install llvm (latest)
+        /opt/homebrew/opt/llvm@20/bin       # brew install llvm@20
+        /opt/homebrew/opt/llvm@19/bin       # brew install llvm@19
+        /opt/homebrew/opt/llvm@18/bin       # brew install llvm@18
+        /opt/homebrew/opt/llvm@17/bin       # brew install llvm@17
+        /opt/homebrew/opt/llvm@16/bin       # brew install llvm@16
+        /opt/homebrew/opt/llvm@15/bin       # brew install llvm@15
+        /opt/homebrew/opt/llvm@14/bin       # brew install llvm@14
+    NO_DEFAULT_PATH
+)
 message(STATUS "Found clang-format: ${CLANG_FORMAT_EXE}")
 if(CLANG_FORMAT_EXE)
     add_custom_target(format
@@ -116,7 +143,20 @@ if(CLANG_FORMAT_EXE)
     add_dependencies(check format)
 endif()
 
-find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
+# clang-tidy: LLVMインストールが必要
+find_program(CLANG_TIDY_EXE 
+    NAMES clang-tidy
+    PATHS 
+        /opt/homebrew/opt/llvm/bin          # brew install llvm (latest)
+        /opt/homebrew/opt/llvm@20/bin       # brew install llvm@20
+        /opt/homebrew/opt/llvm@19/bin       # brew install llvm@19
+        /opt/homebrew/opt/llvm@18/bin       # brew install llvm@18
+        /opt/homebrew/opt/llvm@17/bin       # brew install llvm@17
+        /opt/homebrew/opt/llvm@16/bin       # brew install llvm@16
+        /opt/homebrew/opt/llvm@15/bin       # brew install llvm@15
+        /opt/homebrew/opt/llvm@14/bin       # brew install llvm@14
+    NO_DEFAULT_PATH
+)
 message(STATUS "Found clang-tidy: ${CLANG_TIDY_EXE}")
 if(CLANG_TIDY_EXE)
     set(CMAKE_CXX_CLANG_TIDY
@@ -130,19 +170,39 @@ if(CLANG_TIDY_EXE)
 endif()
 
 find_program(CPPCHECK cppcheck)
+message(STATUS "Found cppcheck: ${CPPCHECK}")
 if(CPPCHECK)
     add_custom_target(run-cppcheck
         COMMAND ${CPPCHECK}
-            --project=${CMAKE_BINARY_DIR}/compile_commands.json
-            -i.venv
-            -isrc/bindings
-            --enable=warning,style,performance,portability,information
+            --enable=all
             --inconclusive
-            --error-exitcode=1
+            --std=c++17
+            --platform=native
+            -I include/
+            --suppress=missingIncludeSystem
+            --suppress=unusedFunction
+            --inline-suppr
+            --quiet
+            ${SOURCE_FILES_EXCLUDE_BINDING}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Running cppcheck"
+        COMMENT "Running cppcheck static analysis (excluding bindings)"
+        VERBATIM
+    )
+    add_custom_target(run-cppcheck-verbose
+        COMMAND ${CPPCHECK}
+            --enable=all
+            --inconclusive
+            --std=c++17
+            --platform=native
+            -I include/
+            --suppress=missingIncludeSystem
+            --suppress=unusedFunction
+            --inline-suppr
+            --verbose
+            ${SOURCE_FILES_EXCLUDE_BINDING}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running cppcheck static analysis (verbose output, excluding bindings)"
         VERBATIM
     )
     add_dependencies(check run-cppcheck)
 endif()
-
