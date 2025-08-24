@@ -1,0 +1,153 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 19,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default Config",
+            "description": "Default configure preset using system toolchain",
+            "generator": "Unix Makefiles",
+            "binaryDir": "build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug Config",
+            "description": "Debug configuration for all platforms",
+            "inherits": ["default"],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "macos",
+            "displayName": "macOS Development", 
+            "description": "macOS with system compilers + Homebrew quality tools",
+            "inherits": ["default"],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "cacheVariables": {
+                "CLANG_FORMAT_SEARCH_PATHS": "/opt/homebrew/bin;/opt/homebrew/opt/llvm/bin;/opt/homebrew/opt/llvm@*/bin",
+                "CLANG_TIDY_SEARCH_PATHS": "/opt/homebrew/opt/llvm/bin;/opt/homebrew/opt/llvm@*/bin",
+                "SCAN_BUILD_SEARCH_PATHS": "/opt/homebrew/opt/llvm/bin;/opt/homebrew/opt/llvm@*/bin"
+            }
+        },
+        {
+            "name": "ubuntu", 
+            "displayName": "Ubuntu/Debian",
+            "description": "GCC build + LLVM quality tools",
+            "inherits": ["default"],
+            "condition": {
+                "type": "matches",
+                "string": "${hostSystemName}",
+                "regex": "Linux"
+            },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CLANG_FORMAT_SEARCH_PATHS": "/usr/lib/llvm-*/bin;/usr/bin;/usr/local/bin",
+                "CLANG_TIDY_SEARCH_PATHS": "/usr/lib/llvm-*/bin;/usr/bin;/usr/local/bin",
+                "SCAN_BUILD_SEARCH_PATHS": "/usr/lib/llvm-*/bin;/usr/bin;/usr/local/bin",
+                "CPPCHECK_ADDITIONAL_ARGS": "--platform=unix64"
+            }
+        },
+        {
+            "name": "rhel",
+            "displayName": "RHEL Family",
+            "description": "GCC build + LLVM quality tools (RHEL/CentOS/Alma/Rocky/AmazonLinux2)",
+            "inherits": ["default"],
+            "condition": {
+                "type": "matches", 
+                "string": "${hostSystemName}",
+                "regex": "Linux"
+            },
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++", 
+                "CLANG_FORMAT_SEARCH_PATHS": "/opt/rh/llvm-toolset-*/root/usr/bin;/usr/bin;/usr/local/bin",
+                "CLANG_TIDY_SEARCH_PATHS": "/opt/rh/llvm-toolset-*/root/usr/bin;/usr/bin;/usr/local/bin",
+                "SCAN_BUILD_SEARCH_PATHS": "/opt/rh/llvm-toolset-*/root/usr/bin;/usr/bin;/usr/local/bin",
+                "CPPCHECK_ADDITIONAL_ARGS": "--platform=unix64"
+            }
+        },
+        {
+            "name": "llvm-build",
+            "displayName": "LLVM Build + Tools",
+            "description": "LLVM for both building and quality tools (optional)",
+            "inherits": ["default"],
+            "toolchainFile": "toolchains/llvm-toolchain.cmake"
+        },
+        {
+            "name": "ci",
+            "displayName": "CI Configuration",
+            "description": "Continuous integration optimized",
+            "inherits": ["default"],
+            "cacheVariables": {
+                "BUILD_TESTING": "ON",
+                "ENABLE_CLANG_TIDY": "OFF",
+                "ENABLE_CLANG_FORMAT": "OFF"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default"
+        },
+        {
+            "name": "debug", 
+            "configurePreset": "debug"
+        },
+        {
+            "name": "macos-debug",
+            "configurePreset": "macos",
+            "configuration": "Debug"
+        },
+        {
+            "name": "ubuntu-debug",
+            "configurePreset": "ubuntu", 
+            "configuration": "Debug"
+        },
+        {
+            "name": "rhel-debug",
+            "configurePreset": "rhel",
+            "configuration": "Debug"
+        },
+        {
+            "name": "llvm-build", 
+            "configurePreset": "llvm-build"
+        },
+        {
+            "name": "llvm-build-debug",
+            "configurePreset": "llvm-build",
+            "configuration": "Debug"
+        },
+        {
+            "name": "ci",
+            "configurePreset": "ci"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default"
+        },
+        {
+            "name": "ci",
+            "configurePreset": "ci",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ]
+}

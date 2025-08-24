@@ -13,6 +13,19 @@
             "type": "shell",
             "command": "cmake",
             "args": [
+                "--preset=${input:presetName}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "CMakeでプリセットを使用してセットアップを実行"
+        },
+        {
+            "label": "cmake_configure_legacy",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
                 "-S.",
                 "-Bbuild",
                 "-DCMAKE_BUILD_TYPE=${input:buildType}",
@@ -22,7 +35,7 @@
                 "kind": "build",
                 "isDefault": false
             },
-            "detail": "CMakeでビルドタイプを指定してセットアップを実行"
+            "detail": "CMakeで従来方式のセットアップを実行（プリセット未対応環境用）"
         },
         {
             "label": "cmake_build",
@@ -44,8 +57,23 @@
     ],
     "inputs": [
         {
+            "id": "presetName",
+            "description": "Select CMake preset",
+            "type": "pickString",
+            "options": [
+                "default",
+                "debug", 
+                "macos",
+                "ubuntu",
+                "rhel",
+                "llvm-build",
+                "ci"
+            ],
+            "default": "default"
+        },
+        {
             "id": "buildType",
-            "description": "Select build type",
+            "description": "Select build type (legacy mode)",
             "type": "pickString",
             "options": [
                 "Debug",

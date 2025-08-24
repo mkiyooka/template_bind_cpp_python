@@ -1,23 +1,22 @@
-# CMake >= 3.15 for scikit-build-core
-cmake_minimum_required(VERSION 3.15)
+# CMake version requirements:
+# - nanobind: >= 3.15 (scikit-build-core)
+# - cmake --preset: >= 3.19
+# - project requirement: >= 3.19
+cmake_minimum_required(VERSION 3.19)
 
-# LLVM環境変数検出とツールチェーン自動選択
-if(DEFINED ENV{CC} AND "$ENV{CC}" MATCHES "llvm@14")
-    message(STATUS "Detected LLVM14 environment via CC: $ENV{CC}")
-    # コンパイラのみLLVM14を使用、アーカイバ・リンカはシステム標準を使用（macOS互換性のため）
-    set(CMAKE_C_COMPILER "$ENV{CC}" CACHE FILEPATH "C compiler" FORCE)
-    set(CMAKE_CXX_COMPILER "$ENV{CXX}" CACHE FILEPATH "C++ compiler" FORCE)
-    # macOS互換性のためシステム標準のarを使用
-    find_program(SYSTEM_AR ar PATHS /usr/bin /bin NO_DEFAULT_PATH)
-    find_program(SYSTEM_RANLIB ranlib PATHS /usr/bin /bin NO_DEFAULT_PATH)
-    if(SYSTEM_AR)
-        set(CMAKE_AR "${SYSTEM_AR}" CACHE FILEPATH "Archiver" FORCE)
+# Default compiler preference (non-macOS: GCC preferred)
+if(NOT APPLE AND NOT DEFINED CMAKE_C_COMPILER AND NOT DEFINED CMAKE_CXX_COMPILER)
+    find_program(GCC_C_COMPILER NAMES gcc cc)
+    find_program(GCC_CXX_COMPILER NAMES g++ c++)
+    if(GCC_C_COMPILER AND GCC_CXX_COMPILER)
+        set(CMAKE_C_COMPILER "${GCC_C_COMPILER}" CACHE FILEPATH "C compiler" FORCE)
+        set(CMAKE_CXX_COMPILER "${GCC_CXX_COMPILER}" CACHE FILEPATH "C++ compiler" FORCE)
+        message(STATUS "Using GCC toolchain: ${GCC_C_COMPILER}, ${GCC_CXX_COMPILER}")
     endif()
-    if(SYSTEM_RANLIB)
-        set(CMAKE_RANLIB "${SYSTEM_RANLIB}" CACHE FILEPATH "Ranlib" FORCE)
-    endif()
-    message(STATUS "Using LLVM14 compilers with system ar/ranlib for macOS compatibility")
 endif()
+
+# Optional: LLVM toolchain override
+# Use: cmake --preset=<preset> -DCMAKE_TOOLCHAIN_FILE=toolchains/llvm-toolchain.cmake
 
 project(template_bind_cpp_python
     VERSION 0.1.0
@@ -112,93 +111,62 @@ foreach(src ${ALL_SOURCE_FILES})
     endif()
 endforeach()
 
-# ----- Setup custom targets -----
-add_custom_target(check)
+# ----- Setup quality management tools (separate from build) -----
+include(cmake/quality-tools.cmake)
+setup_quality_tools()
 
-# clang-format: 個別インストール版を優先、次にLLVMバージョン
-find_program(CLANG_FORMAT_EXE 
-    NAMES clang-format
-    PATHS 
-        /opt/homebrew/bin                    # brew install clang-format
-        /opt/homebrew/opt/llvm/bin          # brew install llvm (latest)
-        /opt/homebrew/opt/llvm@20/bin       # brew install llvm@20
-        /opt/homebrew/opt/llvm@19/bin       # brew install llvm@19
-        /opt/homebrew/opt/llvm@18/bin       # brew install llvm@18
-        /opt/homebrew/opt/llvm@17/bin       # brew install llvm@17
-        /opt/homebrew/opt/llvm@16/bin       # brew install llvm@16
-        /opt/homebrew/opt/llvm@15/bin       # brew install llvm@15
-        /opt/homebrew/opt/llvm@14/bin       # brew install llvm@14
-    NO_DEFAULT_PATH
-)
-message(STATUS "Found clang-format: ${CLANG_FORMAT_EXE}")
-if(CLANG_FORMAT_EXE)
-    add_custom_target(format
-        COMMAND ${CLANG_FORMAT_EXE} -i ${ALL_SOURCE_FILES}
-        COMMENT "Formatting source code with clang-format"
-    )
-    add_custom_target(format-dry
-        COMMAND ${CLANG_FORMAT_EXE} --dry-run --Werror ${ALL_SOURCE_FILES}
-        COMMENT "Checking formatting (dry-run)"
-    )
+# Setup custom targets
+add_custom_target(check)
+setup_quality_targets("${ALL_SOURCE_FILES}")
+
+# Add quality targets to check
+if(TARGET format)
     add_dependencies(check format)
 endif()
-
-# clang-tidy: LLVMインストールが必要
-find_program(CLANG_TIDY_EXE 
-    NAMES clang-tidy
-    PATHS 
-        /opt/homebrew/opt/llvm/bin          # brew install llvm (latest)
-        /opt/homebrew/opt/llvm@20/bin       # brew install llvm@20
-        /opt/homebrew/opt/llvm@19/bin       # brew install llvm@19
-        /opt/homebrew/opt/llvm@18/bin       # brew install llvm@18
-        /opt/homebrew/opt/llvm@17/bin       # brew install llvm@17
-        /opt/homebrew/opt/llvm@16/bin       # brew install llvm@16
-        /opt/homebrew/opt/llvm@15/bin       # brew install llvm@15
-        /opt/homebrew/opt/llvm@14/bin       # brew install llvm@14
-    NO_DEFAULT_PATH
-)
-message(STATUS "Found clang-tidy: ${CLANG_TIDY_EXE}")
-if(CLANG_TIDY_EXE)
-    set(CMAKE_CXX_CLANG_TIDY
-        "${CLANG_TIDY_EXE}"
-    )
-    add_custom_target(lint
-        COMMAND ${CMAKE_CXX_CLANG_TIDY} ${SOURCE_FILES_EXCLUDE_BINDING}
-        COMMENT "Running clang-tidy"
-    )
+if(TARGET lint)
     add_dependencies(check lint)
 endif()
+# Note: static-analysis is not added to check by default as it's more intensive
+# Use: cmake --build build --target static-analysis
 
 find_program(CPPCHECK cppcheck)
 message(STATUS "Found cppcheck: ${CPPCHECK}")
 if(CPPCHECK)
+    # cppcheckの基本設定
+    set(CPPCHECK_BASE_ARGS
+        --enable=all
+        --inconclusive
+        --std=c++17
+        --platform=native
+        -I include/
+        --suppress=missingIncludeSystem
+        --suppress=unusedFunction
+        --inline-suppr
+        --quiet
+    )
+    
+    # プリセットから追加引数を取得
+    if(DEFINED CPPCHECK_ADDITIONAL_ARGS)
+        string(REPLACE " " ";" CPPCHECK_EXTRA_ARGS "${CPPCHECK_ADDITIONAL_ARGS}")
+        list(APPEND CPPCHECK_BASE_ARGS ${CPPCHECK_EXTRA_ARGS})
+    endif()
+    
     add_custom_target(run-cppcheck
         COMMAND ${CPPCHECK}
-            --enable=all
-            --inconclusive
-            --std=c++17
-            --platform=native
-            -I include/
-            --suppress=missingIncludeSystem
-            --suppress=unusedFunction
-            --inline-suppr
-            --quiet
+            ${CPPCHECK_BASE_ARGS}
             ${SOURCE_FILES_EXCLUDE_BINDING}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running cppcheck static analysis (excluding bindings)"
         VERBATIM
     )
+    # cppcheck verbose版（--quietを--verboseに変更）
+    set(CPPCHECK_VERBOSE_ARGS ${CPPCHECK_BASE_ARGS})
+    list(REMOVE_ITEM CPPCHECK_VERBOSE_ARGS "--quiet")
+    list(APPEND CPPCHECK_VERBOSE_ARGS "--verbose")
+    
     add_custom_target(run-cppcheck-verbose
         COMMAND ${CPPCHECK}
-            --enable=all
-            --inconclusive
-            --std=c++17
-            --platform=native
-            -I include/
-            --suppress=missingIncludeSystem
-            --suppress=unusedFunction
-            --inline-suppr
-            --verbose
+            ${CPPCHECK_VERBOSE_ARGS}
             ${SOURCE_FILES_EXCLUDE_BINDING}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running cppcheck static analysis (verbose output, excluding bindings)"

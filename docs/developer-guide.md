@@ -11,16 +11,66 @@ git submodule update --init --recursive
 uv sync
 ```
 
+## 🌍 クロスプラットフォーム対応
+
+CMakePresets.jsonを使用して環境別の設定を分離しています。
+
+### 利用可能なプリセット
+
+## 🎯 設計思想: ビルドとツールの分離
+
+**コンパイル**: 
+- **macOS**: システム標準 (Apple Clang)
+- **Linux**: GCC優先 (互換性・安定性重視)
+
+**品質管理ツール**: 
+- **全環境**: LLVM (clang-format, clang-tidy) 優先
+- **分離理由**: 最新の静的解析とフォーマット機能を活用
+
+### 利用可能なプリセット
+
+| プリセット | 環境 | コンパイラ | 品質ツール | 説明 |
+|------------|------|-----------|------------|------|
+| `default` | 汎用 | システム標準 | システム標準 | 基本設定 |
+| `debug` | 汎用 | システム標準 | システム標準 | デバッグビルド |
+| `macos` | macOS | Apple Clang | Homebrew LLVM | macOS推奨設定 |
+| `ubuntu` | Ubuntu/Debian | GCC | LLVM | Ubuntu推奨設定 |
+| `rhel` | RHEL系 | GCC | LLVM (SCL) | RHEL系推奨設定 |
+| `llvm-build` | 汎用 | LLVM | LLVM | LLVM統一環境 |
+| `ci` | CI環境 | システム標準 | 無効 | CI最適化 |
+
+### プリセット使用方法
+
+```bash
+# 推奨: GCC + LLVM品質ツール
+cmake --preset=ubuntu        # Ubuntu: GCC + LLVM品質ツール
+cmake --build --preset=ubuntu-debug
+
+cmake --preset=rhel          # RHEL系: GCC + LLVM品質ツール  
+cmake --build --preset=rhel-debug
+
+# オプション: LLVM統一環境
+cmake --preset=llvm-build    # すべてLLVM
+cmake --build --preset=llvm-build-debug
+
+# 分離実行
+cmake --preset=ubuntu        # 設定のみ
+cmake --build build          # ビルドのみ
+make format lint             # 品質チェック
+```
+
 ## ⚙️ 設定ファイル概要
 
 | ファイル | 目的 | 使用方法 |
 |----------|------|----------|
-| `pyproject.toml` | Python設定・依存関係 | `uv sync`で読み込み |
-| `CMakeLists.txt` | C++ビルド・品質ツール | `cmake ..`で読み込み |
+| `CMakePresets.json` | 環境別ビルド設定 | `cmake --preset=<name>` |
+| `CMakeLists.txt` | C++ビルド制御 | プリセットから自動読み込み |
+| `cmake/quality-tools.cmake` | 品質管理ツール設定 | CMakeLists.txtから自動読み込み |
+| `toolchains/llvm-toolchain.cmake` | LLVM統一環境 | `llvm-build`プリセット使用 |
 | `.vscode/launch.json` | VSCodeデバッグ設定 | F5でデバッグ開始 |
 | `.vscode/tasks.json` | VSCodeビルドタスク | Ctrl+Shift+Pでタスク実行 |
-| `.clang-format` | C++コードフォーマット | `make format`で適用 |
-| `.clang-tidy` | C++静的解析 | `make lint`で実行 |
+| `.clang-format` | フォーマットルール | 自動適用 |
+| `.clang-tidy` | 静的解析ルール | 自動適用 |
 
 ## 🔨 ビルド
 
@@ -32,15 +82,68 @@ uv pip install -e .
 ```
 
 ### C++直接ビルド（デバッグ用）
+
+#### プリセット使用（推奨）
 ```bash
-cmake -S . -B build
+# 環境に応じてプリセット選択
+cmake --preset=ubuntu          # Ubuntu
+cmake --preset=macos           # macOS
+cmake --preset=rhel            # RHEL系
+
+# デバッグビルド実行
+cmake --build --preset=ubuntu-debug
+cmake --build --preset=rhel-debug
+```
+
+#### 従来方式（プリセット未対応環境）
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
 
-生成されるファイル:
+#### 生成されるファイル
 ```
 build/src/bindings/_nanobind_module.*.so
-build/debug/main_debug  # デバッグ用実行ファイル
+build/debug/debug_main  # デバッグ用実行ファイル
+```
+
+### 環境別ツール要件
+
+設計思想: **ビルドはGCC、品質ツールはLLVM** で最適な安定性と機能性を実現
+
+#### Ubuntu/Debian
+```bash
+# ビルド環境 (GCC)
+sudo apt update
+sudo apt install build-essential cmake cppcheck
+
+# 品質管理ツール (LLVM) - 推奨
+sudo apt install clang-format clang-tidy clang-tools  # scan-buildも含む
+
+# より新しいLLVMが必要な場合
+wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-15 main"
+sudo apt install clang-format-15 clang-tidy-15
+```
+
+#### RHEL系 (RHEL/CentOS/Alma/Rocky/AmazonLinux2)
+```bash
+# ビルド環境 (GCC)
+sudo yum update
+sudo yum groupinstall "Development Tools"
+sudo yum install cmake3 cppcheck
+
+# 品質管理ツール (LLVM SCL) - 推奨
+sudo yum install centos-release-scl
+sudo yum install llvm-toolset-13  # clang-format, clang-tidy, scan-build含む
+# 使用時: scl enable llvm-toolset-13 bash
+```
+
+#### macOS
+```bash
+# ビルド環境 (Apple Clang) + 品質ツール (Homebrew LLVM)
+brew install cmake cppcheck
+brew install llvm  # clang-format, clang-tidy, scan-build含む
 ```
 
 ### ⚠️ LLVM14環境での注意事項
@@ -74,10 +177,15 @@ sudo apt install cppcheck
 
 ### C++品質チェック（CMake）
 ```bash
-cmake --build build --target check  # 全チェック
-cmake --build build --target format # フォーマット
+cmake --build build --target check  # 全チェック（format + lint + cppcheck）
+cmake --build build --target format # clang-formatフォーマット
 cmake --build build --target lint   # clang-tidy
-cmake --build build --target run-cppcheck # 静的解析
+cmake --build build --target run-cppcheck # cppcheck静的解析
+
+# clang static analyzer（より詳細な解析）
+cmake --build build --target static-analysis    # 静的解析実行
+cmake --build build --target view-analysis      # 解析結果をブラウザで表示
+cmake --build build --target quick-analysis     # エラーを無視して継続実行
 ```
 
 ### Python品質チェック（taskipy）

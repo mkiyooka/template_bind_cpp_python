@@ -36,9 +36,36 @@ uv pip install -e .
 - テンプレート関数の実装例
 - nanobindを用いたバインディング例
 
+### クロスプラットフォーム開発環境
+
+**設計思想: ビルドと品質ツールの分離**
+- **ビルド**: macOS (Apple Clang)、Linux (GCC) - 安定性重視
+- **品質ツール**: 全環境でLLVM (clang-format, clang-tidy) - 最新機能活用
+- **プリセット**: 環境別に最適化された設定を自動適用
+
 ## 開発用ビルド
 
-C++デバッグ用にCMakeから直接ビルド:
+### 環境別プリセット使用（推奨）
+
+```bash
+# Ubuntu環境 (GCC + LLVM品質ツール)
+cmake --preset=ubuntu
+cmake --build --preset=ubuntu-debug
+
+# RHEL系環境 (GCC + LLVM品質ツール)
+cmake --preset=rhel
+cmake --build --preset=rhel-debug
+
+# macOS環境 (Apple Clang + Homebrew LLVM)
+cmake --preset=macos
+cmake --build --preset=macos-debug
+
+# オプション: LLVM統一環境
+cmake --preset=llvm-build
+cmake --build --preset=llvm-build-debug
+```
+
+### 従来方式（プリセット未対応環境）
 
 ```bash
 mkdir build && cd build
@@ -57,6 +84,7 @@ make -j
 
 - [ユーザ向けガイド](docs/user-guide.md)
 - [開発者向けガイド](docs/developer-guide.md)
+- [クロスプラットフォーム開発](docs/cross-platform.md)
 - [開発ルール](docs/development-rules.md)
 - [このプロジェクトの実装状況](docs/implementation-status.md)
 
