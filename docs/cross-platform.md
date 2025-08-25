@@ -54,10 +54,12 @@ brew install cmake cppcheck llvm
 ### Ubuntu/Debian
 
 **ツール検索パス:**
+
 - `/usr/bin` (システム標準)
 - `/usr/local/bin` (手動インストール)
 
 **依存関係インストール:**
+
 ```bash
 sudo apt update
 sudo apt install build-essential cmake cppcheck
@@ -65,16 +67,19 @@ sudo apt install clang-tidy clang-format  # オプション
 ```
 
 **追加設定:**
+
 - `--platform=unix64` (cppcheck)
 
 ### RHEL系 (RHEL/CentOS/Alma/Rocky/AmazonLinux2)
 
 **ツール検索パス:**
+
 - `/usr/bin` (システム標準)
 - `/usr/local/bin` (手動インストール)  
 - `/opt/rh/llvm-toolset-*/root/usr/bin` (SCL LLVM)
 
 **依存関係インストール:**
+
 ```bash
 sudo yum update
 sudo yum groupinstall "Development Tools"
@@ -87,6 +92,7 @@ scl enable llvm-toolset-13 bash
 ```
 
 **特徴:**
+
 - RHEL系統合対応 (RHEL/CentOS/Alma/Rocky/AmazonLinux2)
 - SCL (Software Collections) LLVM対応
 - dnf/yum パッケージ管理
@@ -140,6 +146,7 @@ python scripts/benchmark_hamming.py
 ### launch.json対応
 
 デバッグ設定は全環境共通で使用可能：
+
 - `Debug Main (All Modules)`
 - `Debug Main (Fast Class Only)`  
 - `Debug Main (Simple Function Only)`
@@ -191,5 +198,6 @@ cmake --build build --target test
 ---
 
 **関連ドキュメント:**
+
 - [developer-guide.md](developer-guide.md): 詳細な開発手順
 - [user-guide.md](user-guide.md): エンドユーザー向けガイド

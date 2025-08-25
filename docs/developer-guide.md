@@ -15,22 +15,22 @@ uv sync
 
 CMakePresets.jsonを使用して環境別の設定を分離しています。
 
-### 利用可能なプリセット
-
 ## 🎯 設計思想: ビルドとツールの分離
 
-**コンパイル**: 
+**コンパイル**:
+
 - **macOS**: システム標準 (Apple Clang)
 - **Linux**: GCC優先 (互換性・安定性重視)
 
-**品質管理ツール**: 
+**品質管理ツール**:
+
 - **全環境**: LLVM (clang-format, clang-tidy) 優先
 - **分離理由**: 最新の静的解析とフォーマット機能を活用
 
 ### 利用可能なプリセット
 
 | プリセット | 環境 | コンパイラ | 品質ツール | 説明 |
-|------------|------|-----------|------------|------|
+|---|---|---|---|---|
 | `default` | 汎用 | システム標準 | システム標準 | 基本設定 |
 | `debug` | 汎用 | システム標準 | システム標準 | デバッグビルド |
 | `macos` | macOS | Apple Clang | Homebrew LLVM | macOS推奨設定 |
@@ -62,7 +62,7 @@ make format lint             # 品質チェック
 ## ⚙️ 設定ファイル概要
 
 | ファイル | 目的 | 使用方法 |
-|----------|------|----------|
+|---|---|---|
 | `CMakePresets.json` | 環境別ビルド設定 | `cmake --preset=<name>` |
 | `CMakeLists.txt` | C++ビルド制御 | プリセットから自動読み込み |
 | `cmake/quality-tools.cmake` | 品質管理ツール設定 | CMakeLists.txtから自動読み込み |
@@ -75,6 +75,7 @@ make format lint             # 品質チェック
 ## 🔨 ビルド
 
 ### Python統合ビルド（推奨）
+
 ```bash
 # システム標準コンパイラを使用（推奨）
 unset CC CXX
@@ -84,6 +85,7 @@ uv pip install -e .
 ### C++直接ビルド（デバッグ用）
 
 #### プリセット使用（推奨）
+
 ```bash
 # 環境に応じてプリセット選択
 cmake --preset=ubuntu          # Ubuntu
@@ -96,13 +98,15 @@ cmake --build --preset=rhel-debug
 ```
 
 #### 従来方式（プリセット未対応環境）
+
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
 
 #### 生成されるファイル
-```
+
+```text
 build/src/bindings/_nanobind_module.*.so
 build/debug/debug_main  # デバッグ用実行ファイル
 ```
@@ -112,6 +116,7 @@ build/debug/debug_main  # デバッグ用実行ファイル
 設計思想: **ビルドはGCC、品質ツールはLLVM** で最適な安定性と機能性を実現
 
 #### Ubuntu/Debian
+
 ```bash
 # ビルド環境 (GCC)
 sudo apt update
@@ -127,6 +132,7 @@ sudo apt install clang-format-15 clang-tidy-15
 ```
 
 #### RHEL系 (RHEL/CentOS/Alma/Rocky/AmazonLinux2)
+
 ```bash
 # ビルド環境 (GCC)
 sudo yum update
@@ -140,6 +146,7 @@ sudo yum install llvm-toolset-13  # clang-format, clang-tidy, scan-build含む
 ```
 
 #### macOS
+
 ```bash
 # ビルド環境 (Apple Clang) + 品質ツール (Homebrew LLVM)
 brew install cmake cppcheck
@@ -167,6 +174,7 @@ uv pip install -e .
 ## 🛠️ 品質管理ツール
 
 ### 必要ツールインストール
+
 ```bash
 # Python: uv syncで自動インストール
 # C++ (macOS)
@@ -176,19 +184,34 @@ sudo apt install cppcheck
 ```
 
 ### C++品質チェック（CMake）
-```bash
-cmake --build build --target check  # 全チェック（format + lint + cppcheck）
-cmake --build build --target format # clang-formatフォーマット
-cmake --build build --target lint   # clang-tidy
-cmake --build build --target run-cppcheck # cppcheck静的解析
 
-# clang static analyzer（より詳細な解析）
+#### 基本コマンド
+
+```bash
+# 全体チェック
+cmake --build build --target check              # 全チェック（format + lint + cppcheck）
+cmake --build build --target list-quality-targets # 利用可能なターゲット一覧表示
+
+# 個別チェック
+cmake --build build --target format             # clang-formatでコード整形
+cmake --build build --target format-dry         # フォーマットチェック（変更なし）
+cmake --build build --target lint               # clang-tidyでリント
+cmake --build build --target run-cppcheck       # cppcheck基本静的解析
+cmake --build build --target run-cppcheck-verbose # cppcheck詳細出力
+```
+
+#### clang static analyzer（詳細解析）
+
+```bash
 cmake --build build --target static-analysis    # 静的解析実行
 cmake --build build --target view-analysis      # 解析結果をブラウザで表示
 cmake --build build --target quick-analysis     # エラーを無視して継続実行
 ```
 
+**注意**: `static-analysis`は`check`ターゲットに含まれません（リソース集約的なため）
+
 ### Python品質チェック（taskipy）
+
 ```bash
 task check     # 全チェック
 task format    # ruffフォーマット
@@ -200,10 +223,13 @@ task test      # pytest
 ## 📋 型ヒント対応状況
 
 ### 🚨 開発中の制約
+
 プロジェクト開発中は `src/template_bind_cpp_python/` に`.pyi`ファイルを配置していないため、**型ヒントは利用できません**。
 
 ### ✅ 型ヒント利用方法
+
 別ディレクトリでインストール後に型ヒントが利用可能:
+
 ```bash
 # 別ディレクトリで
 uv pip install -e /path/to/template_bind_cpp_python
@@ -213,11 +239,13 @@ uv pip install -e /path/to/template_bind_cpp_python
 ## 🐛 C++デバッグ
 
 ### VSCodeデバッグ（推奨）
+
 1. **準備**: `.vscode/launch.json`、`.vscode/tasks.json` が設定済み
 2. **開始**: VSCodeで **F5** を押すかデバッグビューで「▶️ 開始」
 3. **操作**: ブレークポイント設定後、GUIで直感的にデバッグ
 
 ### コンソールデバッグ（必要に応じて）
+
 ```bash
 # デバッグビルド
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
@@ -230,6 +258,7 @@ gdb build/debug/main_debug
 ```
 
 ### 共通デバッグコマンド
+
 | コマンド | LLDB | GDB | 動作 |
 |----------|------|-----|------|
 | ブレークポイント | `b file.cpp:10` | `b file.cpp:10` | 行にブレーク設定 |

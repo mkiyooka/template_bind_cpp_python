@@ -14,6 +14,7 @@ if(NOT APPLE AND NOT DEFINED CMAKE_C_COMPILER AND NOT DEFINED CMAKE_CXX_COMPILER
         message(STATUS "Using GCC toolchain: ${GCC_C_COMPILER}, ${GCC_CXX_COMPILER}")
     endif()
 endif()
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) # Enable position-independent code. add "-fPIC"
 
 # Optional: LLVM toolchain override
 # Use: cmake --preset=<preset> -DCMAKE_TOOLCHAIN_FILE=toolchains/llvm-toolchain.cmake
@@ -31,9 +32,6 @@ set(ENV{VIRTUAL_ENV} "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
 set(Python_FIND_VIRTUALENV FIRST)
 message(STATUS "Using virtual environment: $ENV{VIRTUAL_ENV}")
 
-# Enable testing for CTest.
-enable_testing()
-
 # Unset default Python, set .venv Python
 unset(Python_EXECUTABLE)
 # Find Python and binding libraries.
@@ -48,19 +46,13 @@ find_package(Python 3.8
 )
 message(STATUS "Using python: ${Python_EXECUTABLE}")
 
-# --- search nanobind ---
+# Search nanobind
 message(STATUS "Using nanobind")
 add_subdirectory(ext/nanobind REQUIRED)
 
 add_subdirectory(src/core)
 set(NANOBIND_MODULE_NAME _nanobind_module)
 add_subdirectory(src/bindings)
-
-# テストとデバッグターゲットはscikit-build環境では除外
-if(NOT SKBUILD)
-    add_subdirectory(tests/cpp)
-    add_subdirectory(debug)
-endif()
 
 # Set default build type.
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -95,82 +87,48 @@ install(FILES
     DESTINATION ${CMAKE_PROJECT_NAME}
 )
 
-# ----- Make file list for custom targets -----
-file(GLOB_RECURSE ALL_SOURCE_FILES
-    ${CMAKE_SOURCE_DIR}/src/**/*.cpp
-    ${CMAKE_SOURCE_DIR}/src/**/*.c
-    ${CMAKE_SOURCE_DIR}/debug/**/*.cpp
-    ${CMAKE_SOURCE_DIR}/debug/**/*.c
-    ${CMAKE_SOURCE_DIR}/tests/**/*.cpp
-    ${CMAKE_SOURCE_DIR}/include/**/*.hpp
-    ${CMAKE_SOURCE_DIR}/include/**/*.h
-)
-foreach(src ${ALL_SOURCE_FILES})
-    if (NOT src MATCHES "/src/bindings/")
-        list(APPEND SOURCE_FILES_EXCLUDE_BINDING ${src})
-    endif()
-endforeach()
-
-# ----- Setup quality management tools (separate from build) -----
-include(cmake/quality-tools.cmake)
-setup_quality_tools()
-
-# Setup custom targets
-add_custom_target(check)
-setup_quality_targets("${ALL_SOURCE_FILES}")
-
-# Add quality targets to check
-if(TARGET format)
-    add_dependencies(check format)
-endif()
-if(TARGET lint)
-    add_dependencies(check lint)
-endif()
-# Note: static-analysis is not added to check by default as it's more intensive
-# Use: cmake --build build --target static-analysis
-
-find_program(CPPCHECK cppcheck)
-message(STATUS "Found cppcheck: ${CPPCHECK}")
-if(CPPCHECK)
-    # cppcheckの基本設定
-    set(CPPCHECK_BASE_ARGS
-        --enable=all
-        --inconclusive
-        --std=c++17
-        --platform=native
-        -I include/
-        --suppress=missingIncludeSystem
-        --suppress=unusedFunction
-        --inline-suppr
-        --quiet
+# ============================================================================
+# Development Environment Setup (skipped in scikit-build)
+# ============================================================================
+if(NOT SKBUILD)
+    # Enable testing for CTest, call before add_subdirectory(tests/cpp)
+    enable_testing()
+    
+    # Add test and debug directories
+    add_subdirectory(tests/cpp)
+    add_subdirectory(debug)
+    
+    # Collect source files for quality tools
+    file(GLOB_RECURSE ALL_SOURCE_FILES
+        ${CMAKE_SOURCE_DIR}/src/**/*.cpp
+        ${CMAKE_SOURCE_DIR}/src/**/*.c
+        ${CMAKE_SOURCE_DIR}/debug/**/*.cpp
+        ${CMAKE_SOURCE_DIR}/debug/**/*.c
+        ${CMAKE_SOURCE_DIR}/tests/**/*.cpp
+        ${CMAKE_SOURCE_DIR}/include/**/*.hpp
+        ${CMAKE_SOURCE_DIR}/include/**/*.h
     )
     
-    # プリセットから追加引数を取得
-    if(DEFINED CPPCHECK_ADDITIONAL_ARGS)
-        string(REPLACE " " ";" CPPCHECK_EXTRA_ARGS "${CPPCHECK_ADDITIONAL_ARGS}")
-        list(APPEND CPPCHECK_BASE_ARGS ${CPPCHECK_EXTRA_ARGS})
-    endif()
+    # Setup quality management tools
+    include(cmake/quality-tools.cmake)
+    setup_quality_tools()
+    setup_quality_targets("${ALL_SOURCE_FILES}")
+    setup_quality_check_target()
     
-    add_custom_target(run-cppcheck
-        COMMAND ${CPPCHECK}
-            ${CPPCHECK_BASE_ARGS}
-            ${SOURCE_FILES_EXCLUDE_BINDING}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Running cppcheck static analysis (excluding bindings)"
-        VERBATIM
+    # Development utility target for listing available quality targets
+    add_custom_target(list-quality-targets
+        COMMAND ${CMAKE_COMMAND} -E echo "=== Available Quality Targets ==="
+        COMMAND ${CMAKE_COMMAND} -E echo "check             - Run all quality checks: format + lint + cppcheck"
+        COMMAND ${CMAKE_COMMAND} -E echo "format            - Format code with clang-format"
+        COMMAND ${CMAKE_COMMAND} -E echo "format-dry        - Check formatting without changes"
+        COMMAND ${CMAKE_COMMAND} -E echo "lint              - Lint code with clang-tidy"
+        COMMAND ${CMAKE_COMMAND} -E echo "run-cppcheck      - Run cppcheck static analysis"
+        COMMAND ${CMAKE_COMMAND} -E echo "run-cppcheck-verbose - Run cppcheck with verbose output"
+        COMMAND ${CMAKE_COMMAND} -E echo "static-analysis   - Run clang static analyzer for detailed analysis"
+        COMMAND ${CMAKE_COMMAND} -E echo "view-analysis     - View static analysis results in browser"
+        COMMAND ${CMAKE_COMMAND} -E echo "quick-analysis    - Quick static analysis ignoring errors"
+        COMMAND ${CMAKE_COMMAND} -E echo ""
+        COMMAND ${CMAKE_COMMAND} -E echo "Note: All targets exclude src/bindings/ directory"
+        COMMENT "Listing all available quality targets"
     )
-    # cppcheck verbose版（--quietを--verboseに変更）
-    set(CPPCHECK_VERBOSE_ARGS ${CPPCHECK_BASE_ARGS})
-    list(REMOVE_ITEM CPPCHECK_VERBOSE_ARGS "--quiet")
-    list(APPEND CPPCHECK_VERBOSE_ARGS "--verbose")
-    
-    add_custom_target(run-cppcheck-verbose
-        COMMAND ${CPPCHECK}
-            ${CPPCHECK_VERBOSE_ARGS}
-            ${SOURCE_FILES_EXCLUDE_BINDING}
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Running cppcheck static analysis (verbose output, excluding bindings)"
-        VERBATIM
-    )
-    add_dependencies(check run-cppcheck)
 endif()

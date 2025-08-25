@@ -1,5 +1,4 @@
-# File: cmake/quality-tools.cmake
-# Quality management tools configuration (separated from build toolchain)
+# Quality management tools configuration
 # Usage: include(cmake/quality-tools.cmake)
 
 # Platform-specific quality tools search paths
@@ -123,30 +122,40 @@ function(setup_quality_tools)
         endif()
     endif()
 
+    # cppcheck search
+    find_program(CPPCHECK_EXE NAMES cppcheck)
+    
     # Display found tools
     message(STATUS "Quality tools configuration:")
     if(CLANG_FORMAT_EXE)
-        message(STATUS "  clang-format: ${CLANG_FORMAT_EXE}")
+        message(STATUS  "  clang-format: ${CLANG_FORMAT_EXE}")
     else()
         message(WARNING "  clang-format: NOT FOUND")
     endif()
     
     if(CLANG_TIDY_EXE)
-        message(STATUS "  clang-tidy: ${CLANG_TIDY_EXE}")
+        message(STATUS  "  clang-tidy: ${CLANG_TIDY_EXE}")
     else()
         message(WARNING "  clang-tidy: NOT FOUND")
     endif()
     
     if(SCAN_BUILD_EXE)
-        message(STATUS "  scan-build: ${SCAN_BUILD_EXE}")
+        message(STATUS  "  scan-build: ${SCAN_BUILD_EXE}")
     else()
         message(WARNING "  scan-build: NOT FOUND")
+    endif()
+    
+    if(CPPCHECK_EXE)
+        message(STATUS  "  cppcheck: ${CPPCHECK_EXE}")
+    else()
+        message(WARNING "  cppcheck: NOT FOUND")
     endif()
     
     # Set variables for parent scope
     set(CLANG_FORMAT_EXE "${CLANG_FORMAT_EXE}" PARENT_SCOPE)
     set(CLANG_TIDY_EXE "${CLANG_TIDY_EXE}" PARENT_SCOPE)
     set(SCAN_BUILD_EXE "${SCAN_BUILD_EXE}" PARENT_SCOPE)
+    set(CPPCHECK_EXE "${CPPCHECK_EXE}" PARENT_SCOPE)
 endfunction()
 
 # Setup quality tools targets
@@ -244,4 +253,96 @@ function(setup_quality_targets SOURCE_FILES)
             COMMENT "scan-build not found - skipping quick analysis"
         )
     endif()
+
+    # cppcheck targets
+    if(CPPCHECK_EXE)
+        # cppcheck arguments
+        set(CPPCHECK_BASE_ARGS
+            --enable=all
+            --inconclusive
+            --std=c++17
+            --platform=native
+            -I include/
+            --suppress=missingIncludeSystem
+            --suppress=unusedFunction
+            --inline-suppr
+            --quiet
+        )
+        if(DEFINED CPPCHECK_ADDITIONAL_ARGS)
+            string(REPLACE " " ";" CPPCHECK_EXTRA_ARGS "${CPPCHECK_ADDITIONAL_ARGS}")
+            list(APPEND CPPCHECK_BASE_ARGS ${CPPCHECK_EXTRA_ARGS})
+        endif()
+        
+        # Filter out binding files for cppcheck
+        set(CPPCHECK_SOURCE_FILES)
+        foreach(src ${SOURCE_FILES})
+            if (NOT src MATCHES "/src/bindings/")
+                list(APPEND CPPCHECK_SOURCE_FILES ${src})
+            endif()
+        endforeach()
+        
+        add_custom_target(run-cppcheck
+            COMMAND ${CPPCHECK_EXE}
+                ${CPPCHECK_BASE_ARGS}
+                ${CPPCHECK_SOURCE_FILES}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMENT "Running cppcheck static analysis (excluding bindings)"
+            VERBATIM
+        )
+        
+        # cppcheck verbose ver.
+        set(CPPCHECK_VERBOSE_ARGS ${CPPCHECK_BASE_ARGS})
+        list(REMOVE_ITEM CPPCHECK_VERBOSE_ARGS "--quiet")
+        list(APPEND CPPCHECK_VERBOSE_ARGS "--verbose")
+        
+        add_custom_target(run-cppcheck-verbose
+            COMMAND ${CPPCHECK_EXE}
+                ${CPPCHECK_VERBOSE_ARGS}
+                ${CPPCHECK_SOURCE_FILES}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMENT "Running cppcheck static analysis (verbose output, excluding bindings)"
+            VERBATIM
+        )
+    else()
+        add_custom_target(run-cppcheck
+            COMMAND ${CMAKE_COMMAND} -E echo "cppcheck not available"
+            COMMENT "cppcheck not found - skipping cppcheck analysis"
+        )
+        add_custom_target(run-cppcheck-verbose
+            COMMAND ${CMAKE_COMMAND} -E echo "cppcheck not available"
+            COMMENT "cppcheck not found - skipping verbose cppcheck analysis"
+        )
+    endif()
+endfunction()
+
+# Setup integrated quality check target
+function(setup_quality_check_target)
+    # Create main check target
+    add_custom_target(check
+        COMMENT "Running all quality checks (format, lint, cppcheck)"
+    )
+    
+    # Add available quality targets as dependencies
+    if(TARGET format)
+        add_dependencies(check format)
+        message(STATUS "  Added 'format' to check target")
+    endif()
+    
+    if(TARGET lint)
+        add_dependencies(check lint)
+        message(STATUS "  Added 'lint' to check target")
+    endif()
+    
+    if(TARGET run-cppcheck)
+        add_dependencies(check run-cppcheck)
+        message(STATUS "  Added 'run-cppcheck' to check target")
+    endif()
+    
+    # Note: static-analysis is intentionally not added to check by default
+    # as it's more resource-intensive and slower than other checks
+    
+    message(STATUS "Quality check target 'check' configured")
+    message(STATUS "  Usage: cmake --build build --target check")
+    message(STATUS "  Note: static-analysis not included (use separately for detailed analysis)")
+    message(STATUS "        cmake --build build --target static-analysis")
 endfunction()
