@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # 環境自動判定とセットアップスクリプト
-# Usage: ./scripts/setup_environment.sh [preset_name]
+# Usage: ./scripts/setup_environment.sh [preset_name] [--install-tools]
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${PROJECT_ROOT}"
@@ -14,233 +14,198 @@ detect_os() {
     elif [[ -f "/etc/os-release" ]]; then
         . /etc/os-release
         case "$ID" in
-            ubuntu|debian)
-                echo "ubuntu"
-                ;;
-            amzn|centos|rhel|fedora|almalinux|rocky)
-                echo "rhel"  # RHEL系統合
-                ;;
-            *)
-                echo "default"
-                ;;
+            ubuntu|debian) echo "ubuntu" ;;
+            amzn|centos|rhel|fedora|almalinux|rocky) echo "rhel" ;;
+            *) echo "linux" ;;
         esac
     else
-        echo "default"
+        echo "linux"
     fi
 }
 
-# コマンドライン引数解析
-AUTO_INSTALL_TOOLS=false
-PRESET_NAME=""
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --install-tools)
-            AUTO_INSTALL_TOOLS=true
-            shift
-            ;;
-        --help|-h)
-            echo "Usage: $0 [options] [preset_name]"
-            echo "Options:"
-            echo "  --install-tools    自動的に品質管理ツールをインストール"
-            echo "  --help, -h         このヘルプを表示"
-            echo ""
-            echo "Available presets:"
-            echo "  ubuntu, rhel, macos, llvm-build, ci"
-            echo ""
-            echo "Examples:"
-            echo "  $0                    # 環境自動検出"
-            echo "  $0 ubuntu            # Ubuntuプリセット使用"
-            echo "  $0 --install-tools   # 品質ツール自動インストール"
-            exit 0
-            ;;
-        -*)
-            echo "Unknown option: $1" >&2
-            exit 1
-            ;;
-        *)
-            PRESET_NAME="$1"
-            shift
-            ;;
-    esac
-done
-
-# プリセット決定
-if [[ -z "$PRESET_NAME" ]]; then
-    OS_TYPE=$(detect_os)
-    PRESET_NAME="${OS_TYPE}"
-    echo "✅ 環境自動検出: $OS_TYPE (プリセット: $PRESET_NAME)"
-else
-    OS_TYPE=$(detect_os)
-    echo "✅ 指定プリセット: $PRESET_NAME (検出環境: $OS_TYPE)"
-fi
-
-# 依存関係チェック・インストール案内
-check_dependencies() {
-    local os_type="$1"
+# ユーザーローカル環境セットアップ
+setup_local_env() {
+    mkdir -p "$HOME/.local/bin"
+    export PATH="$HOME/.local/bin:$PATH"
     
-    echo "🔍 依存関係確認中..."
+    # シェル設定に追加
+    local shell_rc=""
+    [[ -n "${BASH_VERSION:-}" ]] && shell_rc="$HOME/.bashrc"
+    [[ -n "${ZSH_VERSION:-}" ]] && shell_rc="$HOME/.zshrc"
     
-    # 共通チェック
-    if ! command -v cmake >/dev/null 2>&1; then
-        echo "❌ CMakeが見つかりません"
-        case "$os_type" in
-            macos)
-                echo "💡 インストール: brew install cmake"
-                ;;
-            ubuntu)
-                echo "💡 インストール: sudo apt install cmake"
-                ;;
-            rhel)
-                echo "💡 インストール: sudo yum install cmake3"
-                ;;
-        esac
-        exit 1
+    if [[ -n "$shell_rc" ]] && ! grep -q "\.local/bin" "$shell_rc" 2>/dev/null; then
+        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$shell_rc"
     fi
-    
-    # Python環境
-    if [[ ! -d ".venv" ]]; then
-        echo "❌ Python仮想環境が見つかりません"
-        echo "💡 実行: uv sync"
-        exit 1
-    fi
-    
-    echo "✅ 必要な依存関係が確認できました"
 }
 
-# 品質ツールチェック・自動インストール
-check_quality_tools() {
+# cppcheckインストール
+install_cppcheck() {
     local os_type="$1"
-    local auto_install="${2:-false}"
     
-    echo "🔍 品質管理ツール確認中..."
-    
-    local missing_tools=()
-    local install_commands=()
-    
-    # cppcheck チェック
-    if ! command -v cppcheck >/dev/null 2>&1; then
-        missing_tools+=("cppcheck")
-        case "$os_type" in
-            macos)
-                install_commands+=("brew install cppcheck")
-                ;;
-            ubuntu)
-                install_commands+=("sudo apt install -y cppcheck")
-                ;;
-            rhel)
-                install_commands+=("sudo yum install -y cppcheck")
-                ;;
-        esac
-    fi
-    
-    # clang-format チェック
-    if ! command -v clang-format >/dev/null 2>&1; then
-        missing_tools+=("clang-format")
-        case "$os_type" in
-            macos)
-                install_commands+=("brew install llvm")
-                ;;
-            ubuntu)
-                install_commands+=("sudo apt install -y clang-format")
-                ;;
-            rhel)
-                # RHEL系ではSCL LLVMを推奨
-                install_commands+=("sudo yum install -y centos-release-scl")
-                install_commands+=("sudo yum install -y llvm-toolset-13")
-                ;;
-        esac
-    fi
-    
-    # clang-tidy チェック
-    if ! command -v clang-tidy >/dev/null 2>&1; then
-        if [[ ! " ${missing_tools[*]} " =~ " clang-format " ]]; then
-            missing_tools+=("clang-tidy")
-            case "$os_type" in
-                macos)
-                    install_commands+=("brew install llvm")
-                    ;;
-                ubuntu)
-                    install_commands+=("sudo apt install -y clang-tidy")
-                    ;;
-                rhel)
-                    # clang-formatと同じSCLパッケージに含まれる
-                    ;;
-            esac
-        fi
-    fi
-    
-    # scan-build (clang static analyzer) チェック
-    if ! command -v scan-build >/dev/null 2>&1; then
-        if [[ ! " ${missing_tools[*]} " =~ " clang-format " ]]; then
-            missing_tools+=("scan-build")
-            case "$os_type" in
-                macos)
-                    # LLVMパッケージにscan-buildも含まれる
-                    if [[ ! " ${install_commands[*]} " =~ " brew install llvm " ]]; then
-                        install_commands+=("brew install llvm")
-                    fi
-                    ;;
-                ubuntu)
-                    install_commands+=("sudo apt install -y clang-tools")
-                    ;;
-                rhel)
-                    # SCL LLVMパッケージにscan-buildも含まれる
-                    ;;
-            esac
-        fi
-    fi
-    
-    if [[ ${#missing_tools[@]} -eq 0 ]]; then
-        echo "✅ 品質管理ツールが利用可能です"
+    if command -v cppcheck >/dev/null 2>&1; then
         return 0
     fi
     
-    echo "⚠️  未インストールツール: ${missing_tools[*]}"
-    
-    if [[ "$auto_install" == "true" ]]; then
-        echo "🔧 自動インストールを実行中..."
-        for cmd in "${install_commands[@]}"; do
-            echo "実行中: $cmd"
-            if eval "$cmd"; then
-                echo "✅ インストール成功: $cmd"
+    case "$os_type" in
+        macos)
+            echo "❌ cppcheck未インストール。実行: brew install cppcheck"
+            return 1
+            ;;
+        ubuntu)
+            if [[ $EUID -eq 0 ]] || sudo -n true 2>/dev/null; then
+                sudo apt install -y cppcheck
             else
-                echo "❌ インストール失敗: $cmd"
-                return 1
+                echo "📦 cppcheckをソースからビルド中..."
+                local temp_dir=$(mktemp -d)
+                cd "$temp_dir"
+                curl -L https://github.com/danmar/cppcheck/archive/2.18.0.tar.gz | tar -xz
+                cd cppcheck-*
+                make -j"$(nproc)" MATCHCOMPILER=yes FILESDIR="$HOME/.local/share/cppcheck"
+                make install PREFIX="$HOME/.local" FILESDIR="$HOME/.local/share/cppcheck"
+                rm -rf "$temp_dir"
             fi
-        done
-        
-        # RHEL系の場合、SCL環境の説明
-        if [[ "$os_type" == "rhel" ]] && [[ " ${missing_tools[*]} " =~ " clang-format " ]]; then
-            echo ""
-            echo "📋 RHEL系でLLVM使用時の注意:"
-            echo "   品質チェック時は以下を実行してください:"
-            echo "   scl enable llvm-toolset-13 'cmake --build build --target format lint'"
-        fi
-        
-        echo "✅ 品質管理ツールのインストール完了"
-    else
-        echo "💡 自動インストール用コマンド:"
-        for cmd in "${install_commands[@]}"; do
-            echo "   $cmd"
-        done
-        echo ""
-        echo "💡 自動インストールするには --install-tools オプションを使用"
-        echo "   例: $0 --install-tools"
+            ;;
+        rhel)
+            if [[ $EUID -eq 0 ]] || sudo -n true 2>/dev/null; then
+                sudo yum install -y cppcheck || sudo dnf install -y cppcheck
+            else
+                echo "📦 cppcheckをソースからビルド中..."
+                local temp_dir=$(mktemp -d)
+                cd "$temp_dir"
+                curl -L https://github.com/danmar/cppcheck/archive/2.18.0.tar.gz | tar -xz
+                cd cppcheck-*
+                make -j"$(nproc)" MATCHCOMPILER=yes FILESDIR="$HOME/.local/share/cppcheck"
+                make install PREFIX="$HOME/.local" FILESDIR="$HOME/.local/share/cppcheck"
+                rm -rf "$temp_dir"
+            fi
+            ;;
+        *)
+            echo "📦 cppcheckをソースからビルド中..."
+            local temp_dir=$(mktemp -d)
+            cd "$temp_dir"
+            curl -L https://github.com/danmar/cppcheck/archive/2.13.0.tar.gz | tar -xz
+            cd cppcheck-*
+            make -j"$(nproc 2>/dev/null || echo 2)" MATCHCOMPILER=yes FILESDIR="$HOME/.local/share/cppcheck"
+            make install PREFIX="$HOME/.local" FILESDIR="$HOME/.local/share/cppcheck"
+            rm -rf "$temp_dir"
+            ;;
+    esac
+}
+
+# LLVM toolsインストール
+install_llvm_tools() {
+    local os_type="$1"
+    
+    if command -v clang-format >/dev/null 2>&1 && command -v clang-tidy >/dev/null 2>&1; then
+        return 0
     fi
+    
+    case "$os_type" in
+        macos)
+            echo "❌ LLVM tools未インストール。実行: brew install llvm"
+            return 1
+            ;;
+        ubuntu)
+            local llvm_url="https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/clang+llvm-16.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
+            ;;
+        rhel)
+            local llvm_url="https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/clang+llvm-16.0.6-x86_64-linux-gnu-rhel86.tar.xz"
+            ;;
+        *)
+            local llvm_url="https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.6/clang+llvm-16.0.6-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
+            ;;
+    esac
+    
+    echo "📦 LLVM toolsをダウンロード中..."
+    local temp_dir=$(mktemp -d)
+    cd "$temp_dir"
+    
+    curl -L -o llvm.tar.xz "$llvm_url"
+    tar -xf llvm.tar.xz
+    
+    local llvm_dir=$(find . -name "clang+llvm-*" -type d | head -n1)
+    cp "$llvm_dir/bin/clang-format" "$HOME/.local/bin/" 2>/dev/null || true
+    cp "$llvm_dir/bin/clang-tidy" "$HOME/.local/bin/" 2>/dev/null || true
+    cp "$llvm_dir/bin/scan-build" "$HOME/.local/bin/" 2>/dev/null || true
+    
+    rm -rf "$temp_dir"
+}
+
+# CMakeインストール
+install_cmake() {
+    local os_type="$1"
+    
+    if command -v cmake >/dev/null 2>&1; then
+        return 0
+    fi
+    
+    case "$os_type" in
+        macos)
+            echo "❌ CMake未インストール。実行: brew install cmake"
+            return 1
+            ;;
+        *)
+            echo "📦 CMakeをダウンロード中..."
+            local temp_dir=$(mktemp -d)
+            cd "$temp_dir"
+            
+            local cmake_url="https://github.com/Kitware/CMake/releases/download/v3.31.0/cmake-3.31.0-linux-x86_64.tar.gz"
+            curl -L -o cmake.tar.gz "$cmake_url"
+            tar -xf cmake.tar.gz
+            
+            local cmake_dir=$(find . -name "cmake-*" -type d | head -n1)
+            cp -r "$cmake_dir/bin"/* "$HOME/.local/bin/"
+            cp -r "$cmake_dir/share"/* "$HOME/.local/share/" 2>/dev/null || true
+            
+            rm -rf "$temp_dir"
+            ;;
+    esac
 }
 
 # メイン処理
 main() {
-    echo "🚀 環境セットアップを開始します"
-    echo "📁 プロジェクト: $(basename "$PROJECT_ROOT")"
+    local auto_install=false
+    local preset_name=""
+    
+    # 引数解析
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --install-tools) auto_install=true; shift ;;
+            --help|-h)
+                echo "Usage: $0 [preset_name] [--install-tools]"
+                echo "  preset_name: ubuntu, rhel, macos, etc."
+                echo "  --install-tools: 品質管理ツールを自動インストール"
+                exit 0
+                ;;
+            -*) echo "Unknown option: $1"; exit 1 ;;
+            *) preset_name="$1"; shift ;;
+        esac
+    done
     
     # OS検出とプリセット決定
-    OS_TYPE=$(detect_os)
+    local os_type=$(detect_os)
+    [[ -z "$preset_name" ]] && preset_name="$os_type"
     
-    # 依存関係確認
-    check_dependencies "$OS_TYPE"
-    check_quality_tools "$OS_TYPE" "$AUTO_INSTALL_TOOLS"
+    echo "🚀 環境セットアップ開始 (OS: $os_type, プリセット: $preset_name)"
+    
+    # Python環境チェック
+    if [[ ! -d ".venv" ]]; then
+        echo "❌ Python仮想環境が見つかりません。実行: uv sync"
+        exit 1
+    fi
+    
+    # ツールインストール
+    if [[ "$auto_install" == "true" ]]; then
+        setup_local_env
+        
+        echo "🔧 ツールインストール中..."
+        install_cmake "$os_type" || exit 1
+        install_cppcheck "$os_type" || exit 1
+        install_llvm_tools "$os_type" || exit 1
+        
+        echo "✅ ツールインストール完了"
+        echo "💡 新しいターミナルを開くか、以下を実行: export PATH=\"\$HOME/.local/bin:\$PATH\""
+    fi
     
     # CMakeプリセット確認
     if [[ ! -f "CMakePresets.json" ]]; then
@@ -248,19 +213,19 @@ main() {
         exit 1
     fi
     
-    echo "🔧 CMake設定実行中... (プリセット: $PRESET_NAME)"
-    if ! cmake --preset="$PRESET_NAME"; then
-        echo "❌ CMake設定に失敗しました"
-        echo "💡 利用可能なプリセット:"
-        cmake --list-presets 2>/dev/null | grep "^  " || echo "  プリセット一覧の取得に失敗"
+    # CMakeセットアップとビルド
+    echo "🔧 CMake設定中..."
+    cmake --preset="$preset_name" || {
+        echo "❌ CMake設定失敗。利用可能プリセット:"
+        cmake --list-presets 2>/dev/null || echo "  プリセット一覧の取得失敗"
         exit 1
-    fi
+    }
     
-    echo "🏗️  ビルド実行中..."
-    if ! cmake --build --preset="$PRESET_NAME"; then
-        echo "❌ ビルドに失敗しました"
+    echo "🏗️ ビルド中..."
+    cmake --build --preset="$preset_name" || {
+        echo "❌ ビルド失敗"
         exit 1
-    fi
+    }
     
     echo ""
     echo "🎉 セットアップ完了！"
@@ -268,8 +233,6 @@ main() {
     echo "   • テスト実行: cmake --build build --target test"
     echo "   • 品質チェック: cmake --build build --target check"
     echo "   • Python統合: uv pip install -e ."
-    echo "   • ベンチマーク: python scripts/benchmark_hamming.py"
 }
 
-# メイン実行
-main
+main "$@"

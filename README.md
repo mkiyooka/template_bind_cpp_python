@@ -46,7 +46,7 @@ uv pip install -e .
 - **ビルド**: macOS (Apple Clang)、Linux (GCC) - 安定性重視
 - **品質ツール**: 全環境でLLVM (clang-format, clang-tidy, scan-build) - 最新機能活用
 - **プリセット**: 環境別に最適化された設定を自動適用
-- **自動構築**: `scripts/setup_environment.sh` で環境検出とツール自動インストール
+- **自動構築**: `scripts/setup_environment.sh` で環境検出とツール自動インストール（root権限不要）
 
 ## 開発用ビルド
 
@@ -55,6 +55,9 @@ uv pip install -e .
 ```bash
 # 自動環境検出とセットアップ
 ./scripts/setup_environment.sh
+
+# 品質管理ツール自動インストール（root権限不要）
+./scripts/setup_environment.sh --install-tools
 
 # または手動プリセット指定
 # Ubuntu環境 (GCC + LLVM品質ツール)

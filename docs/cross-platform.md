@@ -10,10 +10,13 @@ macOS、Ubuntu、RHEL系（RHEL/CentOS/Alma/Rocky/AmazonLinux2）での開発環
 # 環境自動検出・セットアップ
 ./scripts/setup_environment.sh
 
+# 品質管理ツール自動インストール（root権限不要）
+./scripts/setup_environment.sh --install-tools
+
 # 手動でプリセット指定
-./scripts/setup_environment.sh ubuntu
-./scripts/setup_environment.sh rhel
-./scripts/setup_environment.sh macos
+./scripts/setup_environment.sh ubuntu --install-tools
+./scripts/setup_environment.sh rhel --install-tools
+./scripts/setup_environment.sh macos --install-tools
 ```
 
 ### 手動セットアップ
@@ -38,13 +41,18 @@ cmake --build --preset=macos-debug
 ### macOS (Homebrew)
 
 **ツール検索パス:**
+- `$HOME/.local/bin` (ユーザーローカル)
 - `/opt/homebrew/bin` (clang-format)
 - `/opt/homebrew/opt/llvm/bin` (LLVM各バージョン)
 - `/opt/homebrew/opt/llvm@{14-20}/bin`
 
 **依存関係インストール:**
 ```bash
+# Homebrewを使用（推奨）
 brew install cmake cppcheck llvm
+
+# または自動インストール
+./scripts/setup_environment.sh --install-tools
 ```
 
 **特徴:**
@@ -55,15 +63,20 @@ brew install cmake cppcheck llvm
 
 **ツール検索パス:**
 
+- `$HOME/.local/bin` (ユーザーローカル)
 - `/usr/bin` (システム標準)
 - `/usr/local/bin` (手動インストール)
 
 **依存関係インストール:**
 
 ```bash
+# 管理者権限でシステムインストール
 sudo apt update
 sudo apt install build-essential cmake cppcheck
 sudo apt install clang-tidy clang-format  # オプション
+
+# またはroot権限不要のユーザーローカルインストール（推奨）
+./scripts/setup_environment.sh --install-tools
 ```
 
 **追加設定:**
@@ -74,6 +87,7 @@ sudo apt install clang-tidy clang-format  # オプション
 
 **ツール検索パス:**
 
+- `$HOME/.local/bin` (ユーザーローカル)
 - `/usr/bin` (システム標準)
 - `/usr/local/bin` (手動インストール)  
 - `/opt/rh/llvm-toolset-*/root/usr/bin` (SCL LLVM)
@@ -81,6 +95,7 @@ sudo apt install clang-tidy clang-format  # オプション
 **依存関係インストール:**
 
 ```bash
+# 管理者権限でシステムインストール
 sudo yum update
 sudo yum groupinstall "Development Tools"
 sudo yum install cmake3 cppcheck
@@ -89,6 +104,9 @@ sudo yum install cmake3 cppcheck
 sudo yum install centos-release-scl
 sudo yum install llvm-toolset-13
 scl enable llvm-toolset-13 bash
+
+# またはroot権限不要のユーザーローカルインストール（推奨）
+./scripts/setup_environment.sh --install-tools
 ```
 
 **特徴:**

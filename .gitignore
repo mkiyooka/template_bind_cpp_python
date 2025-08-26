@@ -179,3 +179,9 @@ _build/
 
 # Compilation database
 compile_commands.json
+
+# Archive files
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.zip
