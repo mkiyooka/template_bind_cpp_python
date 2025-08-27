@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <iostream>
 #include <vector>
 
@@ -6,11 +7,11 @@
 int main() noexcept {
     try {
         // テストデータ
-        std::vector<uint64_t> a = {0x1234567890ABCDEF, 0xFFFFFFFFFFFFFFFF, 0x0000000000000000};
-        std::vector<uint64_t> b = {0xFEDCBA0987654321, 0x0000000000000000, 0xFFFFFFFFFFFFFFFF};
+        const std::vector<uint64_t> a = {0x1234567890ABCDEF, 0xFFFFFFFFFFFFFFFF, 0x0000000000000000};
+        const std::vector<uint64_t> b = {0xFEDCBA0987654321, 0x0000000000000000, 0xFFFFFFFFFFFFFFFF};
 
-        fast_class::HammingDistanceCalculator calculator(a, b);
-        int result = calculator.calculate();
+        const fast_class::HammingDistanceCalculator calculator(a, b);
+        const int result = calculator.calculate();
 
         // 期待値: 36 + 64 + 64 = 164
         if (result == 164) {

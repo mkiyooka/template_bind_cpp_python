@@ -111,47 +111,6 @@ build/src/bindings/_nanobind_module.*.so
 build/debug/debug_main  # デバッグ用実行ファイル
 ```
 
-### 環境別ツール要件
-
-設計思想: **ビルドはGCC、品質ツールはLLVM** で最適な安定性と機能性を実現
-
-#### Ubuntu/Debian
-
-```bash
-# ビルド環境 (GCC)
-sudo apt update
-sudo apt install build-essential cmake cppcheck
-
-# 品質管理ツール (LLVM) - 推奨
-sudo apt install clang-format clang-tidy clang-tools  # scan-buildも含む
-
-# より新しいLLVMが必要な場合
-wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-15 main"
-sudo apt install clang-format-15 clang-tidy-15
-```
-
-#### RHEL系 (RHEL/CentOS/Alma/Rocky/AmazonLinux2)
-
-```bash
-# ビルド環境 (GCC)
-sudo yum update
-sudo yum groupinstall "Development Tools"
-sudo yum install cmake3 cppcheck
-
-# 品質管理ツール (LLVM SCL) - 推奨
-sudo yum install centos-release-scl
-sudo yum install llvm-toolset-13  # clang-format, clang-tidy, scan-build含む
-# 使用時: scl enable llvm-toolset-13 bash
-```
-
-#### macOS
-
-```bash
-# ビルド環境 (Apple Clang) + 品質ツール (Homebrew LLVM)
-brew install cmake cppcheck
-brew install llvm  # clang-format, clang-tidy, scan-build含む
-```
 
 ### ⚠️ LLVM14環境での注意事項
 
@@ -173,14 +132,42 @@ uv pip install -e .
 
 ## 🛠️ 品質管理ツール
 
-### 必要ツールインストール
+### 品質管理ツールインストール
+
+#### macOS (Homebrew)
 
 ```bash
-# Python: uv syncで自動インストール
-# C++ (macOS)
-brew install cppcheck
-# C++ (Ubuntu)
-sudo apt install cppcheck
+brew install cmake cppcheck llvm@16
+```
+
+#### Linux（管理者権限あり）
+
+```bash
+# Ubuntu/Debian
+sudo apt install build-essential cmake cppcheck clang-format clang-tidy
+
+# RHEL系
+sudo yum install cmake3 cppcheck clang-tools-extra
+# または
+sudo dnf install cmake cppcheck clang-tools-extra
+```
+
+#### Linux（管理者権限なし）
+
+```bash
+# miseインストール
+curl https://mise.run | sh
+
+# ツールインストール
+mise install cmake@4.1.0 llvm@16
+mise use -g cmake@4.1.0 llvm@16
+
+# cppcheckソースビルド
+cd /tmp
+curl -L https://github.com/danmar/cppcheck/archive/2.18.0.tar.gz | tar -xz
+cd cppcheck-*
+make -j MATCHCOMPILER=yes HAVE_RULES=yes CXXFLAGS="-O2 -DNDEBUG -Wall -Wno-sign-compare -Wno-unused-function"
+make install PREFIX=$HOME/.local FILESDIR=$HOME/.local/share/cppcheck
 ```
 
 ### C++品質チェック（CMake）

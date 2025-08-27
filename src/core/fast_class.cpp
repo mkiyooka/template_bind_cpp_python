@@ -1,5 +1,8 @@
 #include "fast_class.hpp"
+#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 namespace fast_class {
 

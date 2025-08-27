@@ -41,12 +41,14 @@ cmake --build --preset=macos-debug
 ### macOS (Homebrew)
 
 **ツール検索パス:**
+
 - `$HOME/.local/bin` (ユーザーローカル)
 - `/opt/homebrew/bin` (clang-format)
 - `/opt/homebrew/opt/llvm/bin` (LLVM各バージョン)
 - `/opt/homebrew/opt/llvm@{14-20}/bin`
 
 **依存関係インストール:**
+
 ```bash
 # Homebrewを使用（推奨）
 brew install cmake cppcheck llvm
@@ -56,6 +58,7 @@ brew install cmake cppcheck llvm
 ```
 
 **特徴:**
+
 - LLVM14環境自動検出・対応
 - Homebrew管理ツール優先使用
 

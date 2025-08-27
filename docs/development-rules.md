@@ -3,11 +3,13 @@
 ## 📝 コミット前チェック
 
 ### Python
+
 ```bash
 task check  # ruff + pyright + pytest
 ```
 
 ### C++
+
 ```bash
 cmake --build build --target check  # format + lint + cppcheck
 ```
