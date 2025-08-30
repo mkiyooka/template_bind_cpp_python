@@ -1,80 +1,100 @@
 {
-  "files.exclude": {
-    "**/.venv": true,
-    "**/.nox": true,
-    "**/.ruff_cache": true,
-    "**/.pytest_cache": true,
-    "**/__pycache__": true,
-    "**/*.egg-info": true,
-  },
-  "files.watcherExclude": {
-    "**/.venv": true,
-    "**/.nox": true,
-    "**/.ruff_cache": true,
-    "**/.pytest_cache": true,
-    "**/__pycache__": true,
-    "**/ext": true
-  },
-  "search.exclude": {
-    "**/.venv": true,
-    "**/.nox": true,
-    "**/.ruff_cache": true,
-    "**/.pytest_cache": true,
-    "**/__pycache__": true,
-    "**/ext": true
-  },
-  /* 
-   * Python file settings
-   */
-  "[python]": {
-    "editor.rulers": [80],
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "explicit",
-      "source.organizeImports": "explicit"
+    /* Python file settings */
+    "[python]": {
+        "editor.rulers": [80],
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        }
     },
-  },
-  /* Ruff for python */
-  "ruff.lint.enable": true,
-  "ruff.importStrategy": "fromEnvironment",
-  /* Python testing configuration */
-  "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true,
-  "python.testing.autoTestDiscoverOnSaveEnabled": true,
-  /* Python path configuration */
-  "python.terminal.activateEnvironment": true,
-  "python.terminal.executeInFileDir": false,
-  /* Python environment for testing */
-  "python.experiments.optInto": ["pythonTestAdapter"],
+    /* Ruff for python */
+    "ruff.lint.enable": true,
+    "ruff.importStrategy": "fromEnvironment",
+    /* Python testing configuration */
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    /* Python path configuration */
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.executeInFileDir": false,
+    /* Python environment for testing */
+    "python.experiments.optInto": ["pythonTestAdapter"],
 
-  /*
-   * C++ file settings
-   */
-  "[cpp]": {
-    "editor.rulers": [120],
-    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
-    "editor.formatOnSave": true,
-  },
-  "C_Cpp.formatting": "disabled", // use clangd
-  "C_Cpp.intelliSenseEngine": "disabled", // use clangd
-  "C_Cpp.codeAnalysis.clangTidy.enabled": true,
-  "files.associations": {
-    ".clang-format": "yaml",
-    ".clang-tidy": "yaml",
-    ".clangd": "yaml"
-  },
-  "cmake.buildDirectory": "${workspaceFolder}/_build",
+    /* C++ file settings */
+    "[cpp]": {
+        "editor.rulers": [120],
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.formatOnSave": true
+    },
+    "C_Cpp.formatting": "disabled", // use clangd
+    "C_Cpp.intelliSenseEngine": "disabled", // use clangd
+    "C_Cpp.codeAnalysis.clangTidy.enabled": true,
+    "cmake.buildDirectory": "${workspaceFolder}/_build",
 
-  /*
-   * toml file settings
-   */
-  "[toml]": {
-    "editor.defaultFormatter": "tamasfe.even-better-toml",
-    "editor.formatOnSave": true,
-  },
-  "evenBetterToml.taplo.configFile.enabled": true,
-  "evenBetterToml.taplo.configFile.path": "${workspaceFolder}/taplo.toml",
-  "markdown.extension.list.indentationSize": "inherit",
-  "markdown-preview-enhanced.breakOnSingleNewLine": false,
+    /* toml file settings */
+    "[toml]": {
+        "editor.defaultFormatter": "dprint.dprint",
+        "editor.formatOnSave": true
+    },
+
+    /* json, jsonc */
+    "[json][jsonc]": {
+        "editor.defaultFormatter": "dprint.dprint",
+        "editor.formatOnSave": true
+    },
+
+    /* yaml */
+    "[yaml]": {
+        "editor.defaultFormatter": "dprint.dprint",
+        "editor.formatOnSave": true
+    },
+
+    /* markdown */
+    "[markdown]": {
+        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+        "editor.formatOnSave": true,
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+            "comments": "off",
+            "strings": "off",
+            "other": "off"
+        }
+    },
+    "markdown-preview-enhanced.breakOnSingleNewLine": false,
+
+    "files.associations": {
+        ".clang-format": "yaml",
+        ".clang-tidy": "yaml",
+        ".clangd": "yaml",
+        "dprint.json": "jsonc",
+        "settings.json": "jsonc"
+    },
+
+    /* ignore, exclude settings */
+    "files.exclude": {
+        "**/.venv": true,
+        "**/.nox": true,
+        "**/.ruff_cache": true,
+        "**/.pytest_cache": true,
+        "**/__pycache__": true,
+        "**/*.egg-info": true
+    },
+    "files.watcherExclude": {
+        "**/.venv": true,
+        "**/.nox": true,
+        "**/.ruff_cache": true,
+        "**/.pytest_cache": true,
+        "**/__pycache__": true,
+        "**/ext": true
+    },
+    "search.exclude": {
+        "**/.venv": true,
+        "**/.nox": true,
+        "**/.ruff_cache": true,
+        "**/.pytest_cache": true,
+        "**/__pycache__": true,
+        "**/ext": true
+    }
 }

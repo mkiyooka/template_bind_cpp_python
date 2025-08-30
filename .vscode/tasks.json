@@ -62,7 +62,7 @@
             "type": "pickString",
             "options": [
                 "default",
-                "debug", 
+                "debug",
                 "macos",
                 "ubuntu",
                 "rhel",

@@ -28,7 +28,7 @@
         },
         {
             "name": "macos",
-            "displayName": "macOS Development", 
+            "displayName": "macOS Development",
             "description": "macOS with system compilers + Homebrew quality tools",
             "inherits": ["default"],
             "condition": {
@@ -43,7 +43,7 @@
             }
         },
         {
-            "name": "ubuntu", 
+            "name": "ubuntu",
             "displayName": "Ubuntu/Debian",
             "description": "GCC build + LLVM quality tools",
             "inherits": ["default"],
@@ -67,13 +67,13 @@
             "description": "GCC build + LLVM quality tools (RHEL/CentOS/Alma/Rocky/AmazonLinux2)",
             "inherits": ["default"],
             "condition": {
-                "type": "matches", 
+                "type": "matches",
                 "string": "${hostSystemName}",
                 "regex": "Linux"
             },
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "gcc",
-                "CMAKE_CXX_COMPILER": "g++", 
+                "CMAKE_CXX_COMPILER": "g++",
                 "CLANG_FORMAT_SEARCH_PATHS": "/opt/rh/llvm-toolset-*/root/usr/bin;/usr/bin;/usr/local/bin",
                 "CLANG_TIDY_SEARCH_PATHS": "/opt/rh/llvm-toolset-*/root/usr/bin;/usr/bin;/usr/local/bin",
                 "SCAN_BUILD_SEARCH_PATHS": "/opt/rh/llvm-toolset-*/root/usr/bin;/usr/bin;/usr/local/bin",
@@ -105,7 +105,7 @@
             "configurePreset": "default"
         },
         {
-            "name": "debug", 
+            "name": "debug",
             "configurePreset": "debug"
         },
         {
@@ -115,7 +115,7 @@
         },
         {
             "name": "ubuntu-debug",
-            "configurePreset": "ubuntu", 
+            "configurePreset": "ubuntu",
             "configuration": "Debug"
         },
         {
@@ -124,7 +124,7 @@
             "configuration": "Debug"
         },
         {
-            "name": "llvm-build", 
+            "name": "llvm-build",
             "configurePreset": "llvm-build"
         },
         {

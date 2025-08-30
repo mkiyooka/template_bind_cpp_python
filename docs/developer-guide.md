@@ -4,6 +4,9 @@ nanobind使用C++/Pythonバインディングプロジェクトの開発環境�
 
 ## 🚀 環境構築
 
+- aa
+    - aa
+
 ```bash
 git clone <repo>
 cd <dir>
@@ -29,15 +32,15 @@ CMakePresets.jsonを使用して環境別の設定を分離しています。
 
 ### 利用可能なプリセット
 
-| プリセット | 環境 | コンパイラ | 品質ツール | 説明 |
-|---|---|---|---|---|
-| `default` | 汎用 | システム標準 | システム標準 | 基本設定 |
-| `debug` | 汎用 | システム標準 | システム標準 | デバッグビルド |
-| `macos` | macOS | Apple Clang | Homebrew LLVM | macOS推奨設定 |
-| `ubuntu` | Ubuntu/Debian | GCC | LLVM | Ubuntu推奨設定 |
-| `rhel` | RHEL系 | GCC | LLVM (SCL) | RHEL系推奨設定 |
-| `llvm-build` | 汎用 | LLVM | LLVM | LLVM統一環境 |
-| `ci` | CI環境 | システム標準 | 無効 | CI最適化 |
+| プリセット   | 環境          | コンパイラ   | 品質ツール    | 説明           |
+| ------------ | ------------- | ------------ | ------------- | -------------- |
+| `default`    | 汎用          | システム標準 | システム標準  | 基本設定       |
+| `debug`      | 汎用          | システム標準 | システム標準  | デバッグビルド |
+| `macos`      | macOS         | Apple Clang  | Homebrew LLVM | macOS推奨設定  |
+| `ubuntu`     | Ubuntu/Debian | GCC          | LLVM          | Ubuntu推奨設定 |
+| `rhel`       | RHEL系        | GCC          | LLVM (SCL)    | RHEL系推奨設定 |
+| `llvm-build` | 汎用          | LLVM         | LLVM          | LLVM統一環境   |
+| `ci`         | CI環境        | システム標準 | 無効          | CI最適化       |
 
 ### プリセット使用方法
 
@@ -61,16 +64,16 @@ make format lint             # 品質チェック
 
 ## ⚙️ 設定ファイル概要
 
-| ファイル | 目的 | 使用方法 |
-|---|---|---|
-| `CMakePresets.json` | 環境別ビルド設定 | `cmake --preset=<name>` |
-| `CMakeLists.txt` | C++ビルド制御 | プリセットから自動読み込み |
-| `cmake/quality-tools.cmake` | 品質管理ツール設定 | CMakeLists.txtから自動読み込み |
-| `toolchains/llvm-toolchain.cmake` | LLVM統一環境 | `llvm-build`プリセット使用 |
-| `.vscode/launch.json` | VSCodeデバッグ設定 | F5でデバッグ開始 |
-| `.vscode/tasks.json` | VSCodeビルドタスク | Ctrl+Shift+Pでタスク実行 |
-| `.clang-format` | フォーマットルール | 自動適用 |
-| `.clang-tidy` | 静的解析ルール | 自動適用 |
+| ファイル                          | 目的               | 使用方法                       |
+| --------------------------------- | ------------------ | ------------------------------ |
+| `CMakePresets.json`               | 環境別ビルド設定   | `cmake --preset=<name>`        |
+| `CMakeLists.txt`                  | C++ビルド制御      | プリセットから自動読み込み     |
+| `cmake/quality-tools.cmake`       | 品質管理ツール設定 | CMakeLists.txtから自動読み込み |
+| `toolchains/llvm-toolchain.cmake` | LLVM統一環境       | `llvm-build`プリセット使用     |
+| `.vscode/launch.json`             | VSCodeデバッグ設定 | F5でデバッグ開始               |
+| `.vscode/tasks.json`              | VSCodeビルドタスク | Ctrl+Shift+Pでタスク実行       |
+| `.clang-format`                   | フォーマットルール | 自動適用                       |
+| `.clang-tidy`                     | 静的解析ルール     | 自動適用                       |
 
 ## 🔨 ビルド
 
@@ -110,7 +113,6 @@ cmake --build build
 build/src/bindings/_nanobind_module.*.so
 build/debug/debug_main  # デバッグ用実行ファイル
 ```
-
 
 ### ⚠️ LLVM14環境での注意事項
 
@@ -246,15 +248,15 @@ gdb build/debug/main_debug
 
 ### 共通デバッグコマンド
 
-| コマンド | LLDB | GDB | 動作 |
-|----------|------|-----|------|
+| コマンド         | LLDB            | GDB             | 動作             |
+| ---------------- | --------------- | --------------- | ---------------- |
 | ブレークポイント | `b file.cpp:10` | `b file.cpp:10` | 行にブレーク設定 |
-| 実行開始 | `run` | `run` | プログラム実行 |
-| ステップオーバー | `next` | `next` | 次の行 |
-| ステップイン | `step` | `step` | 関数内に入る |
-| 変数表示 | `p var` | `p var` | 変数値表示 |
-| 継続実行 | `c` | `c` | 次のブレークまで |
-| 終了 | `q` | `q` | デバッガ終了 |
+| 実行開始         | `run`           | `run`           | プログラム実行   |
+| ステップオーバー | `next`          | `next`          | 次の行           |
+| ステップイン     | `step`          | `step`          | 関数内に入る     |
+| 変数表示         | `p var`         | `p var`         | 変数値表示       |
+| 継続実行         | `c`             | `c`             | 次のブレークまで |
+| 終了             | `q`             | `q`             | デバッガ終了     |
 
 ---
 

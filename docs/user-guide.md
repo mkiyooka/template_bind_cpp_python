@@ -5,6 +5,7 @@ C++テンプレートバインディングプロジェクトのエンドユー�
 ## 📦 インストール
 
 ### ローカルインストール
+
 ```bash
 git clone <repo>
 cd template_bind_cpp_python
@@ -13,6 +14,7 @@ uv pip install -e .
 ```
 
 ### リモートインストール
+
 ```bash
 uv pip install git+https://github.com/user/template_bind_cpp_python.git
 ```
@@ -78,9 +80,11 @@ def calc_hamming(a: List[int], b: List[int]) -> int:
 ## 🛠️ トラブルシューティング
 
 ### インストールエラー
+
 - C++コンパイラが必要です（gcc/clang）
 - submodule更新を忘れずに実行してください
 
 ### パフォーマンスが出ない
+
 - リリースビルドでインストールされているか確認
 - データサイズが小さすぎる場合、Python実装の方が速い場合があります

@@ -1,63 +1,71 @@
-
 Checks: >
-  bugprone-*,
-  cert-*,
-  clang-analyzer-*,
-  cppcoreguidelines-*,
-  -cppcoreguidelines-avoid-magic-numbers,
-  -cppcoreguidelines-avoid-non-const-global-variables,
-  google-*,
-  google-explicit-constructor,
-  -google-readability-todo,
-  hicpp-*,
-  hicpp-explicit-conversions,
-  llvm-*,
-  -llvm-header-guard,
-  misc-*,
-  modernize-*,
-  -modernize-loop-convert,
-  -modernize-use-nodiscard,
-  -modernize-use-trailing-return-type,
-  performance-*,
-  performance-avoid-endl,
-  portability-*,
-  readability-*,
-  -readability-convert-member-functions-to-static,
-  readability-uppercase-literal-suffix,
-  -readability-identifier-length,
-  -readability-magic-numbers,
+    bugprone-*,
+    cert-*,
+    clang-analyzer-*,
+    cppcoreguidelines-*,
+    cppcoreguidelines-init-variables,
+    cppcoreguidelines-pro-type-member-init,
+    -cppcoreguidelines-avoid-magic-numbers,
+    -cppcoreguidelines-avoid-non-const-global-variables,
+    google-*,
+    google-explicit-constructor,
+    -google-readability-todo,
+    hicpp-*,
+    hicpp-explicit-conversions,
+    llvm-*,
+    llvm-include-order,
+    -llvm-header-guard,
+    misc-*,
+    modernize-*,
+    modernize-use-default-member-init,
+    -modernize-loop-convert,
+    -modernize-use-nodiscard,
+    -modernize-use-trailing-return-type,
+    performance-*,
+    performance-avoid-endl,
+    performance-unnecessary-copy-initialization,
+    performance-unnecessary-value-param,
+    portability-*,
+    readability-*,
+    readability-make-member-function-const,
+    readability-non-const-parameter,
+    readability-simplify-boolean-expr,
+    readability-uppercase-literal-suffix,
+    -readability-convert-member-functions-to-static,
+    -readability-identifier-length,
+    -readability-magic-numbers,
 
-WarningsAsErrors: ''
+WarningsAsErrors: ""
 FormatStyle: file
-HeaderFilterRegex: '^(src/core/|debug|include/|tests/cpp/)'
+HeaderFilterRegex: "^(src/core/|debug|include/|tests/cpp/)"
 CheckOptions:
-  - key: readability-identifier-naming.ClassCase
-    value: CamelCase
-  - key: readability-identifier-naming.StructCase
-    value: CamelCase
-  - key: readability-identifier-naming.FunctionCase
-    value: camelBack
-  - key: readability-identifier-naming.VariableCase
-    value: lower_case
-  - key: readability-identifier-naming.ParameterCase
-    value: lower_case
-  - key: readability-identifier-naming.PrivateMemberCase
-    value: lower_case
-  - key: readability-identifier-naming.PrivateMemberSuffix
-    value: _
-  - key: readability-identifier-naming.ProtectedMemberCase
-    value: lower_case
-  - key: readability-identifier-naming.ProtectedMemberSuffix
-    value: _
-  - key: readability-identifier-naming.PublicMemberCase
-    value: lower_case
-  - key: readability-identifier-naming.GlobalConstantCase
-    value: CamelCase
-  - key: readability-identifier-naming.GlobalConstantPrefix
-    value: k
-  - key: readability-identifier-naming.ConstexprVariableCase
-    value: CamelCase
-  - key: readability-identifier-naming.ConstexprVariablePrefix
-    value: k
-  - key: readability-identifier-naming.MacroDefinitionCase
-    value: UPPER_CASE
+    - key: readability-identifier-naming.ClassCase
+      value: CamelCase
+    - key: readability-identifier-naming.StructCase
+      value: CamelCase
+    - key: readability-identifier-naming.FunctionCase
+      value: camelBack
+    - key: readability-identifier-naming.VariableCase
+      value: lower_case
+    - key: readability-identifier-naming.ParameterCase
+      value: lower_case
+    - key: readability-identifier-naming.PrivateMemberCase
+      value: lower_case
+    - key: readability-identifier-naming.PrivateMemberSuffix
+      value: _
+    - key: readability-identifier-naming.ProtectedMemberCase
+      value: lower_case
+    - key: readability-identifier-naming.ProtectedMemberSuffix
+      value: _
+    - key: readability-identifier-naming.PublicMemberCase
+      value: lower_case
+    - key: readability-identifier-naming.GlobalConstantCase
+      value: CamelCase
+    - key: readability-identifier-naming.GlobalConstantPrefix
+      value: k
+    - key: readability-identifier-naming.ConstexprVariableCase
+      value: CamelCase
+    - key: readability-identifier-naming.ConstexprVariablePrefix
+      value: k
+    - key: readability-identifier-naming.MacroDefinitionCase
+      value: UPPER_CASE

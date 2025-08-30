@@ -92,7 +92,7 @@ sudo apt install clang-tidy clang-format  # オプション
 
 - `$HOME/.local/bin` (ユーザーローカル)
 - `/usr/bin` (システム標準)
-- `/usr/local/bin` (手動インストール)  
+- `/usr/local/bin` (手動インストール)
 - `/opt/rh/llvm-toolset-*/root/usr/bin` (SCL LLVM)
 
 **依存関係インストール:**
@@ -169,7 +169,7 @@ python scripts/benchmark_hamming.py
 デバッグ設定は全環境共通で使用可能：
 
 - `Debug Main (All Modules)`
-- `Debug Main (Fast Class Only)`  
+- `Debug Main (Fast Class Only)`
 - `Debug Main (Simple Function Only)`
 
 ## 🛠️ トラブルシューティング

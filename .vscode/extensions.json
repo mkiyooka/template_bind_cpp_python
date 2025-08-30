@@ -8,5 +8,6 @@
         "tamasfe.even-better-toml",
         "redhat.vscode-yaml",
         "usernamehw.errorlens",
+        "dprint.dprint",
     ]
 }
