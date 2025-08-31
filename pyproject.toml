@@ -16,7 +16,6 @@ dev = [
     "pytest-cov>=6.2.1",
     "ruff>=0.12.3",
     "taskipy>=1.14.1",
-    "pre-commit>=4.2.0",
 ]
 
 [project.scripts]
@@ -33,14 +32,6 @@ wheel.py-api = "cp312"
 
 # Set default build type to Release for scikit-build-core
 cmake.build-type = "Release"
-
-[tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.0.0"
-tag_format = "v$version"
-version_scheme = "semver2"
-update_changelog_on_bump = true
-major_version_zero = true
 
 [tool.pyright]
 venvPath = "."
