@@ -27,16 +27,15 @@ type = "list"
 name = "change_type"
 message = "コミットの種類を選択してください"
 choices = [
-    {value = "feat", name = "feat: 新機能"},
-    {value = "fix", name = "fix: バグ修正"},
-    {value = "docs", name = "docs: ドキュメント変更"},
-    {value = "style", name = "style: フォーマット変更"},
+    {value = "feat",     name = "feat: 新機能"},
+    {value = "fix",      name = "fix: バグ修正"},
+    {value = "docs",     name = "docs: ドキュメント変更"},
+    {value = "style",    name = "style: フォーマット変更"},
     {value = "refactor", name = "refactor: リファクタリング"},
-    {value = "perf", name = "perf: パフォーマンス改善"},
-    {value = "test", name = "test: テスト追加・修正"},
-    {value = "build", name = "build: ビルドシステム変更"},
-    {value = "chore", name = "chore: その他の変更"},
-    {value = "revert", name = "revert: コミット取り消し"}
+    {value = "perf",     name = "perf: パフォーマンス改善"},
+    {value = "test",     name = "test: テスト追加・修正"},
+    {value = "chore",    name = "chore: その他の変更"},
+    {value = "revert",   name = "revert: コミット取り消し"},
 ]
 
 [[tool.commitizen.customize.questions]]
@@ -45,10 +44,14 @@ name = "scope"
 message = "スコープ (省略可):"
 choices = [
     {value = "", name = "-: 省略"},
-    {value = "nox", name = "nox: Nox設定"},
-    {value = "cz", name = "cz: Commitizen設定"},
-    {value = "cpp", name = "cpp: C++ 計算コード"},
-    {value = "bind", name = "bind: バインディング"},
+    {value = "bind",          name = "bind: Python-C++ バインディング"},
+    {value = "core-engine",   name = "core-engine: C++ コアエンジン"},
+    {value = "core-utils",    name = "core-utils: C++ コアユーティリティ"},
+    {value = "core-io",       name = "core-io: C++ コア入出力"},
+    {value = "benchmark",     name = "benchmark: ベンチマーク"},
+    {value = "examples",      name = "examples: サンプルコード"},
+    {value = "python",        name = "python: Pythonコード"},
+    {value = "build",         name = "build: ビルドシステム (CMake, scikit-build)"},
 ]
 
 [[tool.commitizen.customize.questions]]

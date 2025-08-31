@@ -26,6 +26,15 @@ project(template_bind_cpp_python
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(MODULE_NAME module_core)
 
+# Auto-copy compile_commands.json to project root for IDE support
+add_custom_target(copy_compile_commands ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+        ${CMAKE_BINARY_DIR}/compile_commands.json 
+        ${CMAKE_SOURCE_DIR}/compile_commands.json
+    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+    COMMENT "Copying compile_commands.json to project root"
+)
+
 # Define project-wide include directories.
 set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(ENV{VIRTUAL_ENV} "${CMAKE_CURRENT_SOURCE_DIR}/.venv")

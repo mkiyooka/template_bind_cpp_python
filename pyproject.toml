@@ -144,14 +144,14 @@ typecheck-py = { cmd = "uv run --frozen pyright", help = "Type check Python code
 check-py     = { cmd = "task format-py && task lint-py && task typecheck-py && task test-py", help = "Run all Python quality checks" }
 
 # C++ Quality Tasks
-setup-cpp  = { cmd = "cmake -S . -B build && cp build/compile_commands.json ./", help = "Set up C++ development environment" }
-build-cpp  = { cmd = "cmake -S . -B build && cmake --build build", help = "CMake build and copy compile_commands.json" }
+setup-cpp  = { cmd = "cmake -S . -B build", help = "Set up C++ development environment" }
+build-cpp  = { cmd = "cmake -S . -B build && cmake --build build", help = "CMake build" }
 clean-cpp  = { cmd = "rm -rf build/ && rm -f compile_commands.json", help = "Clean CMake build artifacts" }
 test-cpp   = { cmd = "ctest --test-dir build --verbose", help = "Run C++ tests with ctest" }
 format-cpp = { cmd = "cmake --build build --target format", help = "Format C++ code with clang-format" }
 lint-cpp   = { cmd = "cmake --build build --target lint", help = "Lint C++ code with clang-tidy" }
 cppcheck   = { cmd = "cmake --build build --target run-cppcheck", help = "Run cppcheck static analysis" }
-check-cpp  = { cmd = "cmake --build build --target fullcheck", help = "Run all C++ quality checks" }
+check-cpp  = { cmd = "cmake --build build --target fullcheck && task test-cpp", help = "Run all C++ quality checks" }
 
 # Integrated Tasks
 build  = { cmd = "task build-cpp && task build-py", help = "Build both C++ and Python components" }
