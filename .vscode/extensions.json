@@ -4,7 +4,6 @@
         "charliermarsh.ruff",
         "ms-pyright.pyright",
         "njpwerner.autodocstring",
-        "editorconfig.editorconfig",
         "tamasfe.even-better-toml",
         "redhat.vscode-yaml",
         "usernamehw.errorlens",
