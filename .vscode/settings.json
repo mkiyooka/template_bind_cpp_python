@@ -31,6 +31,7 @@
     "C_Cpp.formatting": "disabled", // use clangd
     "C_Cpp.intelliSenseEngine": "disabled", // use clangd
     "C_Cpp.codeAnalysis.clangTidy.enabled": true,
+
     "cmake.buildDirectory": "${workspaceFolder}/_build",
 
     /* toml file settings */
