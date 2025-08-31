@@ -84,43 +84,6 @@ function(setup_quality_tools)
         endif()
     endif()
 
-    # scan-build (clang static analyzer) search
-    if(DEFINED SCAN_BUILD_SEARCH_PATHS)
-        string(REPLACE ";" ";" SCAN_BUILD_PATHS "${SCAN_BUILD_SEARCH_PATHS}")
-        find_program(SCAN_BUILD_EXE
-            NAMES scan-build
-            PATHS ${SCAN_BUILD_PATHS}
-            NO_DEFAULT_PATH
-        )
-    else()
-        # Platform-specific default search (same paths as clang-tidy)
-        if(APPLE)
-            set(DEFAULT_SCAN_BUILD_PATHS
-                "/opt/homebrew/opt/llvm/bin"
-                "/opt/homebrew/opt/llvm@*/bin"
-            )
-        elseif(UNIX)
-            set(DEFAULT_SCAN_BUILD_PATHS
-                "/usr/lib/llvm-*/bin"                        # Ubuntu/Debian
-                "/opt/rh/llvm-toolset-*/root/usr/bin"        # RHEL SCL
-                "/usr/bin"                                   # System fallback
-                "/usr/local/bin"                             # Manual install
-            )
-        endif()
-        
-        if(DEFINED DEFAULT_SCAN_BUILD_PATHS)
-            find_program(SCAN_BUILD_EXE
-                NAMES scan-build
-                PATHS ${DEFAULT_SCAN_BUILD_PATHS}
-                NO_DEFAULT_PATH
-            )
-        endif()
-        
-        # Fallback to system PATH
-        if(NOT SCAN_BUILD_EXE)
-            find_program(SCAN_BUILD_EXE NAMES scan-build)
-        endif()
-    endif()
 
     # cppcheck search
     find_program(CPPCHECK_EXE NAMES cppcheck)
@@ -139,11 +102,6 @@ function(setup_quality_tools)
         message(WARNING "  clang-tidy: NOT FOUND")
     endif()
     
-    if(SCAN_BUILD_EXE)
-        message(STATUS  "  scan-build: ${SCAN_BUILD_EXE}")
-    else()
-        message(WARNING "  scan-build: NOT FOUND")
-    endif()
     
     if(CPPCHECK_EXE)
         message(STATUS  "  cppcheck: ${CPPCHECK_EXE}")
@@ -154,7 +112,6 @@ function(setup_quality_tools)
     # Set variables for parent scope
     set(CLANG_FORMAT_EXE "${CLANG_FORMAT_EXE}" PARENT_SCOPE)
     set(CLANG_TIDY_EXE "${CLANG_TIDY_EXE}" PARENT_SCOPE)
-    set(SCAN_BUILD_EXE "${SCAN_BUILD_EXE}" PARENT_SCOPE)
     set(CPPCHECK_EXE "${CPPCHECK_EXE}" PARENT_SCOPE)
 endfunction()
 
@@ -202,57 +159,6 @@ function(setup_quality_targets SOURCE_FILES)
         )
     endif()
 
-    if(SCAN_BUILD_EXE)
-        # Static analysis with scan-build
-        # Create clean analysis directory
-        set(ANALYSIS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/static-analysis")
-        
-        add_custom_target(static-analysis
-            COMMAND ${CMAKE_COMMAND} -E remove_directory "${ANALYSIS_OUTPUT_DIR}"
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${ANALYSIS_OUTPUT_DIR}"
-            COMMAND ${SCAN_BUILD_EXE} 
-                -o "${ANALYSIS_OUTPUT_DIR}"
-                --status-bugs
-                --use-analyzer=${CMAKE_CXX_COMPILER}
-                cmake --build ${CMAKE_BINARY_DIR} --target cxx_core
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMENT "Running clang static analyzer (scan-build)"
-        )
-        
-        # Viewer target to open analysis results
-        add_custom_target(view-analysis
-            COMMAND ${SCAN_BUILD_EXE} 
-                --view "${ANALYSIS_OUTPUT_DIR}"
-            COMMENT "Opening static analysis results in browser"
-            DEPENDS static-analysis
-        )
-        
-        # Quick analysis (without full rebuild)
-        add_custom_target(quick-analysis
-            COMMAND ${CMAKE_COMMAND} -E remove_directory "${ANALYSIS_OUTPUT_DIR}"
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${ANALYSIS_OUTPUT_DIR}"
-            COMMAND ${SCAN_BUILD_EXE}
-                -o "${ANALYSIS_OUTPUT_DIR}"
-                --status-bugs
-                -k
-                cmake --build ${CMAKE_BINARY_DIR} --target cxx_core
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMENT "Running quick static analysis (keep going on errors)"
-        )
-    else()
-        add_custom_target(static-analysis
-            COMMAND ${CMAKE_COMMAND} -E echo "scan-build not available"
-            COMMENT "scan-build not found - skipping static analysis"
-        )
-        add_custom_target(view-analysis
-            COMMAND ${CMAKE_COMMAND} -E echo "scan-build not available"
-            COMMENT "scan-build not found - skipping analysis viewer"
-        )
-        add_custom_target(quick-analysis
-            COMMAND ${CMAKE_COMMAND} -E echo "scan-build not available"
-            COMMENT "scan-build not found - skipping quick analysis"
-        )
-    endif()
 
     # cppcheck targets
     if(CPPCHECK_EXE)
@@ -318,31 +224,28 @@ endfunction()
 # Setup integrated quality check target
 function(setup_quality_check_target)
     # Create main check target
-    add_custom_target(check
+    add_custom_target(fullcheck
         COMMENT "Running all quality checks (format, lint, cppcheck)"
     )
     
     # Add available quality targets as dependencies
     if(TARGET format)
-        add_dependencies(check format)
-        message(STATUS "  Added 'format' to check target")
+        add_dependencies(fullcheck format)
+        message(STATUS "  Added 'format' to fullcheck target")
     endif()
     
     if(TARGET lint)
-        add_dependencies(check lint)
-        message(STATUS "  Added 'lint' to check target")
+        add_dependencies(fullcheck lint)
+        message(STATUS "  Added 'lint' to fullcheck target")
     endif()
     
     if(TARGET run-cppcheck)
-        add_dependencies(check run-cppcheck)
-        message(STATUS "  Added 'run-cppcheck' to check target")
+        add_dependencies(fullcheck run-cppcheck)
+        message(STATUS "  Added 'run-cppcheck' to fullcheck target")
     endif()
     
-    # Note: static-analysis is intentionally not added to check by default
-    # as it's more resource-intensive and slower than other checks
     
-    message(STATUS "Quality check target 'check' configured")
-    message(STATUS "  Usage: cmake --build build --target check")
-    message(STATUS "  Note: static-analysis not included (use separately for detailed analysis)")
-    message(STATUS "        cmake --build build --target static-analysis")
+    message(STATUS "Quality fullcheck target 'fullcheck' configured")
+    message(STATUS "  Usage: cmake --build build --target fullcheck")
+    message(STATUS "  Available targets: format, lint, run-cppcheck, fullcheck")
 endfunction()

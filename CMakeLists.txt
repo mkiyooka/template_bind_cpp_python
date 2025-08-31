@@ -118,15 +118,12 @@ if(NOT SKBUILD)
     # Development utility target for listing available quality targets
     add_custom_target(list-quality-targets
         COMMAND ${CMAKE_COMMAND} -E echo "=== Available Quality Targets ==="
-        COMMAND ${CMAKE_COMMAND} -E echo "check             - Run all quality checks: format + lint + cppcheck"
+        COMMAND ${CMAKE_COMMAND} -E echo "fullcheck         - Run all quality checks: format + lint + cppcheck"
         COMMAND ${CMAKE_COMMAND} -E echo "format            - Format code with clang-format"
         COMMAND ${CMAKE_COMMAND} -E echo "format-dry        - Check formatting without changes"
         COMMAND ${CMAKE_COMMAND} -E echo "lint              - Lint code with clang-tidy"
         COMMAND ${CMAKE_COMMAND} -E echo "run-cppcheck      - Run cppcheck static analysis"
         COMMAND ${CMAKE_COMMAND} -E echo "run-cppcheck-verbose - Run cppcheck with verbose output"
-        COMMAND ${CMAKE_COMMAND} -E echo "static-analysis   - Run clang static analyzer for detailed analysis"
-        COMMAND ${CMAKE_COMMAND} -E echo "view-analysis     - View static analysis results in browser"
-        COMMAND ${CMAKE_COMMAND} -E echo "quick-analysis    - Quick static analysis ignoring errors"
         COMMAND ${CMAKE_COMMAND} -E echo ""
         COMMAND ${CMAKE_COMMAND} -E echo "Note: All targets exclude src/bindings/ directory"
         COMMENT "Listing all available quality targets"
