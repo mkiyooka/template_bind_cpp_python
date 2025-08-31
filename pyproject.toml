@@ -126,10 +126,10 @@ convention = "numpy"
 strict = true
 
 [tool.pytest.ini_options]
+pythonpath = "src/template_bind_cpp_python"
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
-pythonpath = "template_cli_python"
 addopts = ["--strict-markers", "--strict-config"]
 
 [tool.coverage.run]
