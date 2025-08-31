@@ -11,12 +11,8 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "osx": {
-                "MIMode": "lldb"
-            },
-            "linux": {
-                "MIMode": "gdb"
-            },
+            "osx": { "MIMode": "lldb" },
+            "linux": { "MIMode": "gdb" },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for debugger",
@@ -36,12 +32,8 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "osx": {
-                "MIMode": "lldb"
-            },
-            "linux": {
-                "MIMode": "gdb"
-            },
+            "osx": { "MIMode": "lldb" },
+            "linux": { "MIMode": "gdb" },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for debugger",
@@ -61,12 +53,8 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "osx": {
-                "MIMode": "lldb"
-            },
-            "linux": {
-                "MIMode": "gdb"
-            },
+            "osx": { "MIMode": "lldb" },
+            "linux": { "MIMode": "gdb" },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for debugger",

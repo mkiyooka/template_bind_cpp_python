@@ -49,7 +49,7 @@ CMakePresets.jsonを使用して環境別の設定を分離しています。
 cmake --preset=ubuntu        # Ubuntu: GCC + LLVM品質ツール
 cmake --build --preset=ubuntu-debug
 
-cmake --preset=rhel          # RHEL系: GCC + LLVM品質ツール  
+cmake --preset=rhel          # RHEL系: GCC + LLVM品質ツール
 cmake --build --preset=rhel-debug
 
 # オプション: LLVM統一環境

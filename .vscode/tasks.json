@@ -12,13 +12,8 @@
             "label": "cmake_configure",
             "type": "shell",
             "command": "cmake",
-            "args": [
-                "--preset=${input:presetName}"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
+            "args": ["--preset=${input:presetName}"],
+            "group": { "kind": "build", "isDefault": false },
             "detail": "CMakeでプリセットを使用してセットアップを実行"
         },
         {
@@ -31,28 +26,17 @@
                 "-DCMAKE_BUILD_TYPE=${input:buildType}",
                 "-DPython_EXECUTABLE=${workspaceFolder}/.venv/bin/python"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
+            "group": { "kind": "build", "isDefault": false },
             "detail": "CMakeで従来方式のセットアップを実行（プリセット未対応環境用）"
         },
         {
             "label": "cmake_build",
             "type": "shell",
             "command": "cmake",
-            "args": [
-                "--build",
-                "${workspaceFolder}/build"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "args": ["--build", "${workspaceFolder}/build"],
+            "group": { "kind": "build", "isDefault": true },
             "detail": "CMakeでビルドを実行",
-            "dependsOn": [
-                "cmake_configure"
-            ]
+            "dependsOn": ["cmake_configure"]
         }
     ],
     "inputs": [
@@ -75,12 +59,7 @@
             "id": "buildType",
             "description": "Select build type (legacy mode)",
             "type": "pickString",
-            "options": [
-                "Debug",
-                "Release",
-                "RelWithDebInfo",
-                "MinSizeRel"
-            ],
+            "options": ["Debug", "Release", "RelWithDebInfo", "MinSizeRel"],
             "default": "Debug"
         }
     ]

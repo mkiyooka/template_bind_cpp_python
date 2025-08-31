@@ -16,7 +16,6 @@ dev = [
     "pytest-cov>=6.2.1",
     "ruff>=0.12.3",
     "taskipy>=1.14.1",
-    "taplo>=0.9.3",
     "pre-commit>=4.2.0",
 ]
 
@@ -144,8 +143,9 @@ omit = ["tests/*", "noxfile.py", "**/__main__.py"]
 
 [tool.taskipy.tasks]
 build = { cmd = "uv pip install -e .", help = "build and install in development mode" }
-format = { cmd = "uv run --frozen ruff format", help = "run format" }
-lint = { cmd = "uv run --frozen ruff check --fix --show-fixes --exit-non-zero-on-fix", help = "run lint" }
-typecheck = { cmd = "uv run --frozen pyright", help = "run typecheck" }
-test = { cmd = "uv run --frozen pytest --cov=src --cov-report=term", help = "run pytest with coverage report" }
-check = { cmd = "task format && task lint && task typecheck", help = "run format, lint, typecheck" }
+format = "ruff format"
+lint = "ruff check --fix --show-fixes --exit-non-zero-on-fix"
+typecheck = "pyright"
+test = "pytest --cov=src --cov-report=term"
+fullcheck = { cmd = "task format && task lint && task typecheck", help = "format, lint, typecheck" }
+pr = "prettier --write ."

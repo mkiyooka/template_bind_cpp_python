@@ -1,0 +1,5 @@
+**/node_modules/
+**/__pycache__/
+ext/
+third_party/
+uv.lock

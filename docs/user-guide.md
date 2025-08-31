@@ -27,7 +27,7 @@ uv pip install git+https://github.com/user/template_bind_cpp_python.git
 import template_bind_cpp_python as cpp
 
 # テストデータ
-a_values = [0x123456789ABCDEF0, 0xFEDCBA9876543210]  
+a_values = [0x123456789ABCDEF0, 0xFEDCBA9876543210]
 b_values = [0x0FEDCBA987654321, 0x123456789ABCDEF0]
 
 # 高速C++実装でハミング距離計算
@@ -49,7 +49,7 @@ print(cpp.add_integers(5, 3))      # 8
 print(cpp.add_doubles(5.5, 3.2))   # 8.7
 
 # テンプレート関数
-print(cpp.add_generic_int(10, 20))     # 30  
+print(cpp.add_generic_int(10, 20))     # 30
 print(cpp.add_generic_double(7.7, 2.3)) # 10.0
 ```
 
