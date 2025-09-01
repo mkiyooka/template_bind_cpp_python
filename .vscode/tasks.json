@@ -17,19 +17,6 @@
             "detail": "CMakeでプリセットを使用してセットアップを実行"
         },
         {
-            "label": "cmake_configure_legacy",
-            "type": "shell",
-            "command": "cmake",
-            "args": [
-                "-S.",
-                "-Bbuild",
-                "-DCMAKE_BUILD_TYPE=${input:buildType}",
-                "-DPython_EXECUTABLE=${workspaceFolder}/.venv/bin/python"
-            ],
-            "group": { "kind": "build", "isDefault": false },
-            "detail": "CMakeで従来方式のセットアップを実行（プリセット未対応環境用）"
-        },
-        {
             "label": "cmake_build",
             "type": "shell",
             "command": "cmake",
@@ -45,7 +32,7 @@
             "description": "Select CMake preset",
             "type": "pickString",
             "options": [
-                "default",
+                "release",
                 "debug",
                 "macos",
                 "ubuntu",
@@ -53,14 +40,7 @@
                 "llvm-build",
                 "ci"
             ],
-            "default": "default"
-        },
-        {
-            "id": "buildType",
-            "description": "Select build type (legacy mode)",
-            "type": "pickString",
-            "options": ["Debug", "Release", "RelWithDebInfo", "MinSizeRel"],
-            "default": "Debug"
+            "default": "debug"
         }
     ]
 }
