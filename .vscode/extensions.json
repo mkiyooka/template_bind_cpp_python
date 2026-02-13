@@ -1,15 +1,24 @@
 {
     "recommendations": [
+        // Python拡張
         "ms-python.python",
         "charliermarsh.ruff",
         "ms-pyright.pyright",
-        "llvm-vs-code-extensions.vscode-clangd",
+        // C/C++拡張
         "ms-vscode.cpptools-extension-pack",
         "ms-vscode.cmake-tools",
-        "njpwerner.autodocstring",
+        "llvm-vs-code-extensions.vscode-clangd",
         "usernamehw.errorlens",
+        "jbenden.c-cpp-flylint",
+        "cschlosser.doxdocgen",
+        // TOML拡張
         "tamasfe.even-better-toml",
+        "tombi-toml.tombi",
+        // Markdown拡張
         "DavidAnson.vscode-markdownlint",
-        "esbenp.prettier-vscode"
+        "TakumiI.markdowntable",
+        // 汎用拡張
+        "esbenp.prettier-vscode",
+        "tekumara.typos-vscode"
     ]
 }
