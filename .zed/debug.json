@@ -1,0 +1,24 @@
+[
+    {
+        "label": "Debug Main Program",
+        "adapter": "CodeLLDB",
+        "request": "launch",
+        "program": "build/app",
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "build": {
+            "command": "sh",
+            "args": ["-c", "pixi run config-debug && pixi run build"],
+        },
+    },
+    {
+        "label": "Debug Tests",
+        "adapter": "CodeLLDB",
+        "request": "launch",
+        "program": "build/tests/test_core",
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "build": {
+            "command": "sh",
+            "args": ["-c", "pixi run config-debug && pixi run build"],
+        },
+    },
+]
