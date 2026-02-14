@@ -43,6 +43,11 @@
     "cmake.environment": {
         "PATH": "${env:HOME}/.pixi/bin:${env:PATH}"
     },
+
+    "cmake.automaticReconfigure": false,
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false,
+
     "c-cpp-flylint.clang.enable": false,
     "c-cpp-flylint.cppcheck.suppressions": [
         "missingIncludeSystem",
