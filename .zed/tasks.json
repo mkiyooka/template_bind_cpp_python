@@ -1,6 +1,7 @@
 // Remote Tasks Configuration
 // These tasks run on the remote server
 [
+    // C++ tasks (pixi経由)
     {
         "label": "cmake config (Release)",
         "command": "pixi",
@@ -44,9 +45,40 @@
         "tags": ["lint"],
     },
     {
-        "label": "fullcheck",
+        "label": "fullcheck (C++)",
         "command": "pixi",
         "args": ["run", "fullcheck"],
         "tags": ["lint"],
+    },
+    // Python tasks (uv経由)
+    {
+        "label": "pytest",
+        "command": "uv",
+        "args": ["run", "--frozen", "pytest", "--cov=src", "--cov-report=term"],
+        "tags": ["test"],
+    },
+    {
+        "label": "ruff format",
+        "command": "uv",
+        "args": ["run", "--frozen", "ruff", "format"],
+        "tags": ["format"],
+    },
+    {
+        "label": "ruff check",
+        "command": "uv",
+        "args": ["run", "--frozen", "ruff", "check", "--fix", "--show-fixes"],
+        "tags": ["lint"],
+    },
+    {
+        "label": "pyright",
+        "command": "uv",
+        "args": ["run", "--frozen", "pyright"],
+        "tags": ["lint"],
+    },
+    // wheel生成
+    {
+        "label": "build wheel",
+        "command": "./scripts/build_wheels.sh",
+        "tags": ["build"],
     },
 ]

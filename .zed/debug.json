@@ -1,9 +1,33 @@
 [
     {
-        "label": "Debug Main Program",
+        "label": "Debug Main (All Modules)",
         "adapter": "CodeLLDB",
         "request": "launch",
-        "program": "build/app",
+        "program": "build/debug/debug_main",
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "build": {
+            "command": "sh",
+            "args": ["-c", "pixi run config-debug && pixi run build"],
+        },
+    },
+    {
+        "label": "Debug Main (Fast Class Only)",
+        "adapter": "CodeLLDB",
+        "request": "launch",
+        "program": "build/debug/debug_main",
+        "args": ["--fast-class"],
+        "cwd": "$ZED_WORKTREE_ROOT",
+        "build": {
+            "command": "sh",
+            "args": ["-c", "pixi run config-debug && pixi run build"],
+        },
+    },
+    {
+        "label": "Debug Main (Simple Function Only)",
+        "adapter": "CodeLLDB",
+        "request": "launch",
+        "program": "build/debug/debug_main",
+        "args": ["--simple-function"],
         "cwd": "$ZED_WORKTREE_ROOT",
         "build": {
             "command": "sh",
@@ -14,7 +38,7 @@
         "label": "Debug Tests",
         "adapter": "CodeLLDB",
         "request": "launch",
-        "program": "build/tests/test_core",
+        "program": "build/tests/cpp/test_hamming",
         "cwd": "$ZED_WORKTREE_ROOT",
         "build": {
             "command": "sh",
