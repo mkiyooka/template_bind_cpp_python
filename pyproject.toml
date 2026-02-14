@@ -28,10 +28,13 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 # nanobind settings
-wheel.py-api = "cp312"
+wheel.py-api = "cp310"
 
 # Set default build type to Release for scikit-build-core
 cmake.build-type = "Release"
+
+# Include nanobind submodule in sdist
+sdist.include = ["ext/nanobind/**"]
 
 [tool.pyright]
 venvPath = "."
@@ -143,15 +146,15 @@ lint-py      = { cmd = "uv run --frozen ruff check --fix --show-fixes --exit-non
 typecheck-py = { cmd = "uv run --frozen pyright", help = "Type check Python code" }
 check-py     = { cmd = "task format-py && task lint-py && task typecheck-py && task test-py", help = "Run all Python quality checks" }
 
-# C++ Quality Tasks
-setup-cpp  = { cmd = "cmake -S . -B build", help = "Set up C++ development environment" }
-build-cpp  = { cmd = "cmake -S . -B build && cmake --build build", help = "CMake build" }
-clean-cpp  = { cmd = "rm -rf build/ && rm -f compile_commands.json", help = "Clean CMake build artifacts" }
-test-cpp   = { cmd = "ctest --test-dir build --verbose", help = "Run C++ tests with ctest" }
-format-cpp = { cmd = "cmake --build build --target format", help = "Format C++ code with clang-format" }
-lint-cpp   = { cmd = "cmake --build build --target lint", help = "Lint C++ code with clang-tidy" }
-cppcheck   = { cmd = "cmake --build build --target run-cppcheck", help = "Run cppcheck static analysis" }
-check-cpp  = { cmd = "cmake --build build --target fullcheck && task test-cpp", help = "Run all C++ quality checks" }
+# C++ Quality Tasks (pixi経由)
+setup-cpp  = { cmd = "pixi run config", help = "Set up C++ development environment" }
+build-cpp  = { cmd = "pixi run config && pixi run build", help = "CMake build" }
+clean-cpp  = { cmd = "pixi run clean", help = "Clean CMake build artifacts" }
+test-cpp   = { cmd = "pixi run test", help = "Run C++ tests with ctest" }
+format-cpp = { cmd = "pixi run format", help = "Format C++ code with clang-format" }
+lint-cpp   = { cmd = "pixi run lint", help = "Lint C++ code with clang-tidy" }
+cppcheck   = { cmd = "pixi run run-cppcheck", help = "Run cppcheck static analysis" }
+check-cpp  = { cmd = "pixi run fullcheck && task test-cpp", help = "Run all C++ quality checks" }
 
 # Integrated Tasks
 build  = { cmd = "task build-cpp && task build-py", help = "Build both C++ and Python components" }
@@ -165,3 +168,22 @@ check  = { cmd = "task check-py && task check-cpp", help = "Run all quality chec
 pr       = { cmd = "prettier --write .", help = "Format with prettier" }
 setup    = { cmd = "task setup-py && task setup-cpp", help = "Set up development environment" }
 help-cpp = { cmd = "cmake --build build --target list-quality-targets", help = "List available CMake quality targets" }
+
+# ============================================================================
+# cibuildwheel configuration
+# ============================================================================
+[tool.cibuildwheel]
+# STABLE_ABI (abi3) を活用: cp310 のみでビルドすれば Python 3.10+ 全バージョンで動作
+build = "cp310-*"
+skip = "*-win*"
+test-requires = ["pytest"]
+test-command = "pytest {project}/tests/python -v"
+before-build = "git submodule update --init --recursive"
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+archs = ["x86_64"]
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]

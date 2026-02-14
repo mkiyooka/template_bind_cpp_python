@@ -37,12 +37,15 @@ add_custom_target(copy_compile_commands ALL
 
 # Define project-wide include directories.
 set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(ENV{VIRTUAL_ENV} "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
-set(Python_FIND_VIRTUALENV FIRST)
-message(STATUS "Using virtual environment: $ENV{VIRTUAL_ENV}")
 
-# Unset default Python, set .venv Python
-unset(Python_EXECUTABLE)
+# SKBUILD時はscikit-build-coreがPythonパスを管理するため、.venvは不要
+if(NOT SKBUILD)
+    set(ENV{VIRTUAL_ENV} "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
+    set(Python_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
+    set(Python_FIND_VIRTUALENV ONLY)
+    message(STATUS "Using virtual environment: $ENV{VIRTUAL_ENV}")
+    unset(Python_EXECUTABLE)
+endif()
 # Find Python and binding libraries.
 if (CMAKE_VERSION VERSION_LESS 3.18)
     set(DEV_MODULE Development)
