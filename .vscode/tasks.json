@@ -1,46 +1,90 @@
 {
     "version": "2.0.0",
     "options": {
-        "cwd": "${workspaceFolder}",
-        "env": {
-            "VIRTUAL_ENV": "${workspaceFolder}/.venv",
-            "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
-        }
+        "cwd": "${workspaceFolder}"
     },
     "tasks": [
         {
             "label": "cmake_configure",
             "type": "shell",
-            "command": "cmake",
-            "args": ["--preset=${input:presetName}"],
+            "command": "pixi",
+            "args": ["run", "${input:configPreset}"],
             "group": { "kind": "build", "isDefault": false },
-            "detail": "CMakeでプリセットを使用してセットアップを実行"
+            "detail": "pixi経由でCMakeプリセットを使用してセットアップを実行"
         },
         {
             "label": "cmake_build",
             "type": "shell",
-            "command": "cmake",
-            "args": ["--build", "${workspaceFolder}/build"],
+            "command": "pixi",
+            "args": ["run", "build"],
             "group": { "kind": "build", "isDefault": true },
-            "detail": "CMakeでビルドを実行",
+            "detail": "pixi経由でCMakeビルドを実行",
             "dependsOn": ["cmake_configure"]
+        },
+        {
+            "label": "cmake_clean",
+            "type": "shell",
+            "command": "pixi",
+            "args": ["run", "clean"],
+            "detail": "CMakeビルド成果物をクリーン"
+        },
+        {
+            "label": "ctest",
+            "type": "shell",
+            "command": "pixi",
+            "args": ["run", "test"],
+            "group": { "kind": "test", "isDefault": false },
+            "detail": "pixi経由でC++テストを実行"
+        },
+        {
+            "label": "pytest",
+            "type": "shell",
+            "command": "uv",
+            "args": [
+                "run",
+                "--frozen",
+                "pytest",
+                "--cov=src",
+                "--cov-report=term"
+            ],
+            "group": { "kind": "test", "isDefault": true },
+            "detail": "uv経由でPythonテストを実行"
+        },
+        {
+            "label": "format_cpp",
+            "type": "shell",
+            "command": "pixi",
+            "args": ["run", "format"],
+            "detail": "pixi経由でclang-formatを実行"
+        },
+        {
+            "label": "lint_cpp",
+            "type": "shell",
+            "command": "pixi",
+            "args": ["run", "lint"],
+            "detail": "pixi経由でclang-tidyを実行"
+        },
+        {
+            "label": "fullcheck_cpp",
+            "type": "shell",
+            "command": "pixi",
+            "args": ["run", "fullcheck"],
+            "detail": "pixi経由でC++品質チェックを一括実行"
+        },
+        {
+            "label": "build_wheel",
+            "type": "shell",
+            "command": "./scripts/build_wheels.sh",
+            "detail": "ビルド済みwheelを生成"
         }
     ],
     "inputs": [
         {
-            "id": "presetName",
-            "description": "Select CMake preset",
+            "id": "configPreset",
+            "description": "Select CMake config task",
             "type": "pickString",
-            "options": [
-                "release",
-                "debug",
-                "macos",
-                "ubuntu",
-                "rhel",
-                "llvm-build",
-                "ci"
-            ],
-            "default": "debug"
+            "options": ["config", "config-debug"],
+            "default": "config-debug"
         }
     ]
 }

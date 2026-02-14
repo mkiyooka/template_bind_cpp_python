@@ -22,21 +22,40 @@
     /* Python environment for testing */
     "python.experiments.optInto": ["pythonTestAdapter"],
 
-    /* C++ file settings */
-    "[cpp]": {
+    /* C/C++ file settings */
+    "[c]": {
         "editor.rulers": [120],
         "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
         "editor.formatOnSave": true
+    },
+    "[cpp]": {
+        "editor.rulers": [120],
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.formatOnSave": true,
+        "editor.inlayHints.enabled": "offUnlessPressed"
     },
     "C_Cpp.formatting": "disabled", // use clangd
     "C_Cpp.intelliSenseEngine": "disabled", // use clangd
     "C_Cpp.codeAnalysis.clangTidy.enabled": true,
 
+    /* CMake settings */
     "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.environment": {
+        "PATH": "${env:HOME}/.pixi/bin:${env:PATH}"
+    },
+    "c-cpp-flylint.clang.enable": false,
+    "c-cpp-flylint.cppcheck.suppressions": [
+        "missingIncludeSystem",
+        "unusedFunction",
+        "unusedStructMember"
+    ],
+    "c-cpp-flylint.lizard.enable": false,
+    "c-cpp-flylint.flawfinder.enable": false,
+    "c-cpp-flylint.flexelint.enable": false,
 
     /* toml file settings */
     "[toml]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.defaultFormatter": "tombi-toml.tombi",
         "editor.formatOnSave": true
     },
 
@@ -76,26 +95,32 @@
     /* ignore, exclude settings */
     "files.exclude": {
         "**/.venv": true,
+        "**/.pixi": true,
         "**/.nox": true,
         "**/.ruff_cache": true,
         "**/.pytest_cache": true,
         "**/__pycache__": true,
-        "**/*.egg-info": true
+        "**/*.egg-info": true,
+        "**/wheelhouse": true
     },
     "files.watcherExclude": {
         "**/.venv": true,
+        "**/.pixi": true,
         "**/.nox": true,
         "**/.ruff_cache": true,
         "**/.pytest_cache": true,
         "**/__pycache__": true,
-        "**/ext": true
+        "**/ext": true,
+        "**/wheelhouse": true
     },
     "search.exclude": {
         "**/.venv": true,
+        "**/.pixi": true,
         "**/.nox": true,
         "**/.ruff_cache": true,
         "**/.pytest_cache": true,
         "**/__pycache__": true,
-        "**/ext": true
+        "**/ext": true,
+        "**/wheelhouse": true
     }
 }
