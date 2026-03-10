@@ -16,3 +16,7 @@ MD022:
     lines_above: 1
     # Blank lines below heading
     lines_below: 1
+# MD060/table-column-style
+# Disable aligned style: Japanese characters have variable display widths,
+# making byte-level pipe alignment impossible without a CJK-aware formatter.
+MD060: false
