@@ -26,6 +26,11 @@ project(template_bind_cpp_python
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(MODULE_NAME module_core)
 
+# Sanitizer / coverage flags must be included before add_subdirectory()
+# so that add_compile_options / add_link_options apply to all targets.
+include(cmake/sanitizer-flags.cmake)
+include(cmake/coverage-flags.cmake)
+
 # Auto-copy compile_commands.json to project root for IDE support
 add_custom_target(copy_compile_commands ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different 
@@ -126,6 +131,9 @@ if(NOT SKBUILD)
     setup_quality_tools()
     setup_quality_targets("${ALL_SOURCE_FILES}")
     setup_quality_check_target()
+
+    # Coverage targets (only active when ENABLE_COVERAGE=ON)
+    include(cmake/coverage.cmake)
     
     # Development utility target for listing available quality targets
     add_custom_target(list-quality-targets

@@ -50,39 +50,49 @@ uv pip install -e .
 
 ## 開発用ビルド
 
-### 環境別プリセット使用（推奨）
+### pixi を使った開発（推奨）
 
 ```bash
-# 自動環境検出とセットアップ
-./scripts/setup_environment.sh
+pixi install
 
-# 品質管理ツール自動インストール（root権限不要）
-./scripts/setup_environment.sh --install-tools
+pixi run config        # cmake --preset=release (Ninja)
+pixi run build         # cmake --build build
+pixi run test          # ctest
+pixi run clean         # ビルドディレクトリをクリーン
+```
 
-# または手動プリセット指定
+### サニタイザ / カバレッジ / Valgrind（Linux）
+
+```bash
+# ASan + UBSan（GCC）
+pixi run asan
+
+# カバレッジレポート（clang、build-coverage/coverage-html/index.html に生成）
+pixi run coverage
+
+# Valgrind（要: sudo apt-get install valgrind）
+pixi run valgrind
+```
+
+### 品質チェック
+
+```bash
+pixi run fullcheck     # typos + clang-tidy + cppcheck
+pixi run lint          # clang-tidy
+pixi run run-cppcheck  # cppcheck
+pixi run format        # clang-format
+```
+
+### 環境別プリセット使用（pixi 未使用時）
+
+```bash
 # Ubuntu環境 (GCC + LLVM品質ツール)
 cmake --preset=ubuntu
 cmake --build --preset=ubuntu-debug
 
-# RHEL系環境 (GCC + LLVM品質ツール)
-cmake --preset=rhel
-cmake --build --preset=rhel-debug
-
 # macOS環境 (Apple Clang + Homebrew LLVM)
 cmake --preset=macos
 cmake --build --preset=macos-debug
-
-# 品質チェック（開発時のみ）
-cmake --build build --target check              # 統合品質チェック
-cmake --build build --target list-quality-targets # 利用可能ターゲット表示
-```
-
-### 従来方式（プリセット未対応環境）
-
-```bash
-mkdir build && cd build
-cmake ..
-make -j
 ```
 
 ## 技術仕様

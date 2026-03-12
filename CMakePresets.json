@@ -27,6 +27,28 @@
             }
         },
         {
+            "name": "coverage",
+            "displayName": "Coverage Build",
+            "description": "Debug build with source-based coverage instrumentation (clang)",
+            "inherits": ["release"],
+            "binaryDir": "${sourceDir}/build-coverage",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_COVERAGE": "ON"
+            }
+        },
+        {
+            "name": "asan",
+            "displayName": "ASan + UBSan Build",
+            "description": "Debug build with AddressSanitizer and UndefinedBehaviorSanitizer",
+            "inherits": ["release"],
+            "binaryDir": "${sourceDir}/build-asan",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "ENABLE_SANITIZERS": "ON"
+            }
+        },
+        {
             "name": "macos",
             "displayName": "macOS Development",
             "description": "macOS with system compilers + Homebrew quality tools",
@@ -135,6 +157,14 @@
         {
             "name": "ci",
             "configurePreset": "ci"
+        },
+        {
+            "name": "coverage",
+            "configurePreset": "coverage"
+        },
+        {
+            "name": "asan",
+            "configurePreset": "asan"
         }
     ],
     "testPresets": [
@@ -148,6 +178,14 @@
             "output": {
                 "outputOnFailure": true
             }
+        },
+        {
+            "name": "coverage",
+            "configurePreset": "coverage"
+        },
+        {
+            "name": "asan",
+            "configurePreset": "asan"
         }
     ]
 }

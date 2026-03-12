@@ -32,6 +32,9 @@ pixi install
 | `CMakePresets.json`               | 環境別ビルド設定     | `cmake --preset=<name>`          |
 | `CMakeLists.txt`                  | C++ビルド制御        | compile_commands.json自動コピー  |
 | `cmake/quality-tools.cmake`       | 品質管理ツール設定   | clang-format/tidy, cppcheck      |
+| `cmake/coverage-flags.cmake`      | カバレッジフラグ     | `ENABLE_COVERAGE=ON` 時に有効    |
+| `cmake/sanitizer-flags.cmake`     | サニタイザフラグ     | `ENABLE_SANITIZERS=ON` 時に有効  |
+| `cmake/coverage.cmake`            | カバレッジターゲット | `coverage` / `coverage-report`   |
 | `toolchains/llvm-toolchain.cmake` | LLVM統一環境         | `llvm-build`プリセット用         |
 | `.vscode/launch.json`             | VSCodeデバッグ設定   | F5でデバッグ開始                 |
 | `.clang-format`, `.clang-tidy`    | C++品質ツール        | 自動適用                         |
@@ -42,6 +45,17 @@ pixi install
 
 ```bash
 uv pip install -e .
+```
+
+### pixi を使った C++ ビルド（推奨）
+
+```bash
+pixi install
+
+pixi run config        # cmake --preset=release (Ninja)
+pixi run build         # cmake --build build
+pixi run test          # ctest
+pixi run clean         # build / build-asan / build-coverage をクリーン
 ```
 
 ### C++直接ビルド（デバッグ用）
@@ -58,15 +72,13 @@ cmake --build --preset=ubuntu-debug
 
 ## 🛠️ 品質管理ツール
 
-### 一括実行
+### pixi 経由（推奨）
 
 ```bash
-# 全体チェック（Python + C++）
-task check
-
-# 言語別チェック
-task check-py    # Python（ruff format/lint + pyright + pytest）
-task check-cpp   # C++（clang-format/tidy + cppcheck + test）
+pixi run fullcheck     # typos + clang-tidy + cppcheck
+pixi run lint          # clang-tidy
+pixi run run-cppcheck  # cppcheck
+pixi run format        # clang-format
 ```
 
 ### 一覧表示
@@ -76,19 +88,46 @@ task check-cpp   # C++（clang-format/tidy + cppcheck + test）
 task -l
 
 # CMakeターゲット一覧
-task help-cpp
+cmake --build build --target list-quality-targets
 ```
 
-### 個別実行例
+## 🔬 サニタイザ / カバレッジ / Valgrind（Linux のみ）
+
+### ASan + UBSan
+
+GCC を使って AddressSanitizer + UndefinedBehaviorSanitizer 付きでビルド・テストします。
 
 ```bash
-# フォーマット（両方式）
-task format-py                                  # taskipy経由
-cmake --build build --target format            # cmake経由
+pixi run asan
+# または手動で:
+cmake --preset=asan   # build-asan/ に出力
+cmake --build build-asan
+ctest --test-dir build-asan
+```
 
-# リント（両方式）
-task lint-cpp                                   # taskipy経由
-cmake --build build --target lint              # cmake経由
+### カバレッジレポート
+
+clang の source-based coverage を使い、HTML レポートを生成します。
+
+```bash
+pixi run coverage
+# レポートは build-coverage/coverage-html/index.html に生成される
+
+# または手動で:
+cmake --preset=coverage  # build-coverage/ に出力
+cmake --build build-coverage --target coverage
+cmake --build build-coverage --target coverage-report
+```
+
+### Valgrind
+
+Valgrind はシステムのパッケージマネージャでインストールしてください（conda-forge 版は非対応）。
+
+```bash
+sudo apt-get install valgrind  # Ubuntu/Debian
+
+pixi run valgrind
+# または: ctest --test-dir build -T memcheck --output-on-failure
 ```
 
 ## 🐛 C++デバッグ
