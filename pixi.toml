@@ -43,11 +43,9 @@ env = { CC = "gcc", CXX = "g++" }
 
 [target.linux-64.tasks.coverage]
 cmd = """
-cmake --preset=coverage &&
-cmake --build build-coverage --target coverage &&
-cmake --build build-coverage --target coverage-report
+cmake --preset=coverage -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ &&
+cmake --build build-coverage --target coverage
 """
-env = { CC = "clang", CXX = "clang++" }
 
 [tasks]
 # ---- normal workflow ----

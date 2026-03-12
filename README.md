@@ -61,6 +61,11 @@ pixi run test          # ctest
 pixi run clean         # ビルドディレクトリをクリーン
 ```
 
+ビルド成果物は `build/` に出力されます。
+
+- スタティックライブラリ: `build/src/core/libcxx_core.a`
+- Python バインディング (.so): `build/src/bindings/_nanobind_module*.so`
+
 ### サニタイザ / カバレッジ / Valgrind（Linux）
 
 ```bash

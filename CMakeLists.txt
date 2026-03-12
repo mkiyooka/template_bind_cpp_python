@@ -23,6 +23,18 @@ project(template_bind_cpp_python
     VERSION 0.1.0
     LANGUAGES CXX C
 )
+
+# conda-forge の GCC パッケージは "ar" シンボリックリンクを作成しないため
+# gcc-ar / llvm-ar / x86_64-conda-linux-gnu-ar などを優先的に検索する
+if(NOT CMAKE_AR)
+    find_program(_AR_EXE NAMES gcc-ar llvm-ar x86_64-conda-linux-gnu-ar ar)
+    if(_AR_EXE)
+        set(CMAKE_AR "${_AR_EXE}" CACHE FILEPATH "Archiver" FORCE)
+        message(STATUS "ar            : ${CMAKE_AR}")
+    endif()
+    unset(_AR_EXE CACHE)
+endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(MODULE_NAME module_core)
 

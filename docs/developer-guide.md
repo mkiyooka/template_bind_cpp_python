@@ -114,9 +114,9 @@ pixi run coverage
 # レポートは build-coverage/coverage-html/index.html に生成される
 
 # または手動で:
-cmake --preset=coverage  # build-coverage/ に出力
+cmake --preset=coverage -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 cmake --build build-coverage --target coverage
-cmake --build build-coverage --target coverage-report
+# レポートは build-coverage/coverage-html/index.html に生成される
 ```
 
 ### Valgrind
