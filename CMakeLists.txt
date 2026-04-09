@@ -38,50 +38,62 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(MODULE_NAME module_core)
 
+# トップレベルビルド判定 (FetchContent で取り込まれた場合はスタンドアロンでない)
+set(_TEMPLATE_STANDALONE OFF)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(_TEMPLATE_STANDALONE ON)
+endif()
+
 # Sanitizer / coverage flags must be included before add_subdirectory()
 # so that add_compile_options / add_link_options apply to all targets.
 include(cmake/sanitizer-flags.cmake)
 include(cmake/coverage-flags.cmake)
 
 # Auto-copy compile_commands.json to project root for IDE support
-add_custom_target(copy_compile_commands ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-        ${CMAKE_BINARY_DIR}/compile_commands.json 
-        ${CMAKE_SOURCE_DIR}/compile_commands.json
-    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
-    COMMENT "Copying compile_commands.json to project root"
-)
+if(_TEMPLATE_STANDALONE)
+    add_custom_target(copy_compile_commands ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_SOURCE_DIR}/compile_commands.json
+        DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+        COMMENT "Copying compile_commands.json to project root"
+    )
+endif()
 
 # Define project-wide include directories.
 set(PROJECT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# SKBUILD時はscikit-build-coreがPythonパスを管理するため、.venvは不要
-if(NOT SKBUILD)
-    set(ENV{VIRTUAL_ENV} "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
-    set(Python_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
-    set(Python_FIND_VIRTUALENV ONLY)
-    message(STATUS "Using virtual environment: $ENV{VIRTUAL_ENV}")
-    unset(Python_EXECUTABLE)
-endif()
-# Find Python and binding libraries.
-if (CMAKE_VERSION VERSION_LESS 3.18)
-    set(DEV_MODULE Development)
-else()
-    set(DEV_MODULE Development.Module)
-endif()
-find_package(Python 3.8
-    REQUIRED COMPONENTS Interpreter ${DEV_MODULE}
-    OPTIONAL_COMPONENTS Development.SABIModule
-)
-message(STATUS "Using python: ${Python_EXECUTABLE}")
-
-# Search nanobind
-message(STATUS "Using nanobind")
-add_subdirectory(ext/nanobind REQUIRED)
-
 add_subdirectory(src/core)
-set(NANOBIND_MODULE_NAME _nanobind_module)
-add_subdirectory(src/bindings)
+
+# Python バインディングはスタンドアロンまたは scikit-build-core 時のみ
+if(_TEMPLATE_STANDALONE OR SKBUILD)
+    # SKBUILD時はscikit-build-coreがPythonパスを管理するため、.venvは不要
+    if(NOT SKBUILD)
+        set(ENV{VIRTUAL_ENV} "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
+        set(Python_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.venv")
+        set(Python_FIND_VIRTUALENV ONLY)
+        message(STATUS "Using virtual environment: $ENV{VIRTUAL_ENV}")
+        unset(Python_EXECUTABLE)
+    endif()
+    # Find Python and binding libraries.
+    if (CMAKE_VERSION VERSION_LESS 3.18)
+        set(DEV_MODULE Development)
+    else()
+        set(DEV_MODULE Development.Module)
+    endif()
+    find_package(Python 3.8
+        REQUIRED COMPONENTS Interpreter ${DEV_MODULE}
+        OPTIONAL_COMPONENTS Development.SABIModule
+    )
+    message(STATUS "Using python: ${Python_EXECUTABLE}")
+
+    # Search nanobind
+    message(STATUS "Using nanobind")
+    add_subdirectory(ext/nanobind REQUIRED)
+
+    set(NANOBIND_MODULE_NAME _nanobind_module)
+    add_subdirectory(src/bindings)
+endif()
 
 # Set default build type.
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -102,24 +114,26 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 endif()
 
 # Install the Python module.
-install(TARGETS
-    ${NANOBIND_MODULE_NAME} LIBRARY
-    DESTINATION ${CMAKE_PROJECT_NAME}
-)
-install(FILES
-    $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/${NANOBIND_MODULE_NAME}.pyi
-    DESTINATION ${CMAKE_PROJECT_NAME}
-    OPTIONAL
-)
-install(FILES
-    $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/py.typed
-    DESTINATION ${CMAKE_PROJECT_NAME}
-)
+if(_TEMPLATE_STANDALONE OR SKBUILD)
+    install(TARGETS
+        ${NANOBIND_MODULE_NAME} LIBRARY
+        DESTINATION ${CMAKE_PROJECT_NAME}
+    )
+    install(FILES
+        $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/${NANOBIND_MODULE_NAME}.pyi
+        DESTINATION ${CMAKE_PROJECT_NAME}
+        OPTIONAL
+    )
+    install(FILES
+        $<TARGET_FILE_DIR:${NANOBIND_MODULE_NAME}>/py.typed
+        DESTINATION ${CMAKE_PROJECT_NAME}
+    )
+endif()
 
 # ============================================================================
-# Development Environment Setup (skipped in scikit-build)
+# Development Environment Setup (skipped in scikit-build and when used as dependency)
 # ============================================================================
-if(NOT SKBUILD)
+if(_TEMPLATE_STANDALONE AND NOT SKBUILD)
     # Enable testing for CTest, call before add_subdirectory(tests/cpp)
     enable_testing()
     
